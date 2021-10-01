@@ -10,11 +10,16 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-include_directories(${CMAKE_SOURCE_DIR}/include)
-link_directories(${CMAKE_SOURCE_DIR}/lib)
-
 find_package(OpenMP REQUIRED)
 find_package(OpenGL REQUIRED)
+
+# third party libraries
+
+# GLFW
+include_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/include)
+link_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/bin)
+
+# main project
 
 set(TARGET_NAME "AdvancedImageProcessor")
 
