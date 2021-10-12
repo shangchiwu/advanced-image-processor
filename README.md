@@ -21,6 +21,6 @@ The Advanced Image Processor is a simple image editor, which is written in C++ 1
 
 This project uses the following libraries / technologies:
 
-- [Dear ImGUI](https://github.com/ocornut/imgui) - interactive GUI
+- [Dear ImGUI](https://github.com/ocornut/imgui) (v1.84.2) - interactive GUI
 - [GLFW](https://www.glfw.org/) (v3.3.4) - window display
 - OpenMP - parallel multi-threading computing for speedup
