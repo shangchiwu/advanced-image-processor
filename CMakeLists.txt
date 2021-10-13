@@ -10,8 +10,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-find_package(OpenMP REQUIRED)
 find_package(OpenGL REQUIRED)
+# find_package(OpenMP REQUIRED)
 
 # third party libraries
 
@@ -44,7 +44,7 @@ add_executable(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     -static -static-libgcc -static-libstdc++
     OpenGL::GL glfw3
-    OpenMP::OpenMP_CXX gomp
+    # OpenMP::OpenMP_CXX gomp
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
