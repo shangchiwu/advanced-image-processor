@@ -1,11 +1,26 @@
 #include <iostream>
+#include <string>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl2.h>
+#include <nfd.h>
 
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
+}
+
+std::string open_image_path() {
+    const char *file_types = "bmp;gif;jpg;png;ppm";
+    nfdchar_t *nfd_filepath = nullptr;
+    NFD_OpenDialog(file_types, nullptr, &nfd_filepath);
+
+    if (nfd_filepath == nullptr)
+        return std::string();
+
+    std::string filename(nfd_filepath);
+    free(nfd_filepath);
+    return filename;
 }
 
 int main(int argc, const char **argv) {
@@ -60,12 +75,18 @@ int main(int argc, const char **argv) {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
         ImGui::SetNextWindowSize(ImVec2(window_w, window_h));
 
-        ImGui::Begin("", nullptr,
-            ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoCollapse |
-            ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings);
+        // menu bar
 
-        ImGui::End();
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("Open image...")) {
+                    std::cout << "Open \"" << open_image_path() << "\"" << std::endl;
+                }
+
+                ImGui::Separator();
+                if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
+            }
+        }
 
         // rendering
 
