@@ -31,6 +31,10 @@ set(IMGUI_SOURCE_FILE
     ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_opengl2.cpp
 )
 
+# Native File Dialog
+include_directories(${CMAKE_SOURCE_DIR}/libs/nfd/include)
+link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
+
 # main project
 
 set(TARGET_NAME "AdvancedImageProcessor")
@@ -44,6 +48,7 @@ add_executable(${TARGET_NAME}
 target_link_libraries(${TARGET_NAME}
     -static -static-libgcc -static-libstdc++
     OpenGL::GL glfw3
+    nfd
     # OpenMP::OpenMP_CXX gomp
 )
 
