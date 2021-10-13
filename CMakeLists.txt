@@ -35,6 +35,10 @@ set(IMGUI_SOURCE_FILE
 include_directories(${CMAKE_SOURCE_DIR}/libs/nfd/include)
 link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 
+# stb_image
+include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
+
+
 # main project
 
 set(TARGET_NAME "AdvancedImageProcessor")
