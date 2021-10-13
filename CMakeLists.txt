@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.14.7)
+
+project(AdvancedImageProcessor CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+find_package(OpenGL REQUIRED)
+# find_package(OpenMP REQUIRED)
+
+# third party libraries
+
+# GLFW
+include_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/include)
+link_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/bin)
+
+# ImGUI
+include_directories(${CMAKE_SOURCE_DIR}/libs/ImGUI)
+set(IMGUI_SOURCE_FILE
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_opengl2.cpp
+)
+
+# main project
+
+set(TARGET_NAME "AdvancedImageProcessor")
+
+add_executable(${TARGET_NAME}
+    ${IMGUI_SOURCE_FILE}
+
+    src/main.cpp
+)
+
+target_link_libraries(${TARGET_NAME}
+    -static -static-libgcc -static-libstdc++
+    OpenGL::GL glfw3
+    # OpenMP::OpenMP_CXX gomp
+)
+
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    target_compile_options(${TARGET_NAME} PRIVATE -Ofast)
+endif()

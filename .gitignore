@@ -3,22 +3,8 @@
 # Build folder
 build
 
-# Prebuilt third party libraries
-lib/*
-
-# C++ compiled files
-*.gch
-*.pch
-*.o
-*.obj
-*.so
-*.dylib
-*.dll
-*.a
-*.lib
-*.exe
-*.out
-*.app
+# # Prebuilt third party libraries
+# lib/*
 
 # CMake files
 CMakeCache.txt
