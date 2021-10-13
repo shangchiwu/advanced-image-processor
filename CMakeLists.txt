@@ -19,11 +19,25 @@ find_package(OpenGL REQUIRED)
 include_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/include)
 link_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/bin)
 
+# ImGUI
+include_directories(${CMAKE_SOURCE_DIR}/libs/ImGUI)
+set(IMGUI_SOURCE_FILE
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_demo.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_draw.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_tables.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_widgets.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_glfw.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_opengl2.cpp
+)
+
 # main project
 
 set(TARGET_NAME "AdvancedImageProcessor")
 
 add_executable(${TARGET_NAME}
+    ${IMGUI_SOURCE_FILE}
+
     src/main.cpp
 )
 
