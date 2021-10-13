@@ -29,6 +29,7 @@ add_executable(${TARGET_NAME}
 
 target_link_libraries(${TARGET_NAME}
     -static -static-libgcc -static-libstdc++
+    OpenGL::GL glfw3
     OpenMP::OpenMP_CXX gomp
 )
 
