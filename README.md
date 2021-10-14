@@ -23,4 +23,5 @@ This project uses the following libraries / technologies:
 
 - [Dear ImGUI](https://github.com/ocornut/imgui) (v1.84.2) - interactive GUI
 - [GLFW](https://www.glfw.org/) (v3.3.4) - window display
+- [Native File Dialog](https://github.com/mlabbe/nativefiledialog) (release_116) - GUI filesystem dialog
 - OpenMP - parallel multi-threading computing for speedup
