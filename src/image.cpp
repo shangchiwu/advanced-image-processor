@@ -12,38 +12,14 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _image_texture_id(0) {}
+Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _texture_id(0) {}
 
-Image::Image(const char *filepath) : Image() {
-    // load from file
-    uint8_t *image_data = stbi_load(filepath, &_image_w, &_image_h, nullptr, 4);
-    if (image_data == nullptr)
-        return;
-
-    // copy pixel data
-    const int size_in_bytes = 4 * _image_w * _image_h;
-    _data = new uint8_t[size_in_bytes];
-    memcpy(_data, image_data, size_in_bytes);
-    stbi_image_free(image_data);
-
-    // create a OpenGL texture identifier
-    glGenTextures(1, &_image_texture_id);
-    glBindTexture(GL_TEXTURE_2D, _image_texture_id);
-
-    // setup filtering parameters for display
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // upload pixels into texture
-#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
-    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-#endif
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image_w, _image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
+Image::Image(const std::string &filepath) : Image() {
+    loadFromFile(filepath);
 }
 
 Image::~Image() {
-    delete [] _data;
-    glDeleteTextures(1, &_image_texture_id);
+    close();
 }
 
 int Image::getImageWidth() const {
@@ -55,17 +31,69 @@ int Image::getImageHeight() const {
 }
 
 GLuint Image::getTextureId() const {
-    return _image_texture_id;
+    return _texture_id;
 }
 
-bool Image::saveToFile(const char *filepath, const std::string &file_type) const {
+bool Image::loadFromFile(const std::string &filepath) {
+    // load from file
+    int image_w = 0;
+    int image_h = 0;
+    uint8_t *image_data = stbi_load(filepath.c_str(), &image_w, &image_h, nullptr, 4);
+    if (image_data == nullptr)
+        return false;
+
+    // close previous image
+    close();
+
+    _image_w = image_w;
+    _image_h = image_h;
+
+    // copy pixel data
+    const int size_in_bytes = 4 * _image_w * _image_h;
+    _data = new uint8_t[size_in_bytes];
+    memcpy(_data, image_data, size_in_bytes);
+    stbi_image_free(image_data);
+
+    // create a OpenGL texture
+    glGenTextures(1, &_texture_id);
+    loadToTexture();
+    return true;
+}
+
+bool Image::saveToFile(const std::string &filepath, const std::string &file_type) const {
     if (file_type == "jpg") {
         constexpr int quality = 95;
-        return stbi_write_jpg(filepath, _image_w, _image_h, 4, _data, quality) != 0;
+        return stbi_write_jpg(filepath.c_str(), _image_w, _image_h, 4, _data, quality) != 0;
     } else if (file_type == "png") {
         const int stride_in_bytes = _image_w * 4;
-        return stbi_write_png(filepath, _image_w, _image_h, 4, _data, stride_in_bytes) != 0;
+        return stbi_write_png(filepath.c_str(), _image_w, _image_h, 4, _data, stride_in_bytes) != 0;
     } else {
         return false;
     }
+}
+
+void Image::close() {
+    if (_data != nullptr) {
+        delete [] _data;
+        glDeleteTextures(1, &_texture_id);
+        _image_w = 0;
+        _image_h = 0;
+        _data = nullptr;
+        _texture_id = 0;
+    }
+}
+
+void Image::loadToTexture() const {
+    // use texture
+    glBindTexture(GL_TEXTURE_2D, _texture_id);
+
+    // setup filtering parameters for display
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // upload pixels into texture
+#if defined(GL_UNPACK_ROW_LENGTH) && !defined(__EMSCRIPTEN__)
+    glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image_w, _image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
 }
