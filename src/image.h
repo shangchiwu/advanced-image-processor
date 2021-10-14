@@ -1,6 +1,7 @@
 #ifndef ADVANCED_IMAGE_PROCESSOR_IMAGE_H__
 #define ADVANCED_IMAGE_PROCESSOR_IMAGE_H__
 
+#include <string>
 #include <GL/gl.h>
 
 class Image {
@@ -14,9 +15,12 @@ public:
     int getImageHeight() const;
     GLuint getTextureId() const;
 
+    bool saveToFile(const char *filepath, const std::string &file_type) const;
+
 private:
     int _image_w;
     int _image_h;
+    uint8_t *_data;
     GLuint _image_texture_id;
 };
 

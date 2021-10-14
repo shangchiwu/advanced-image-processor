@@ -31,12 +31,33 @@ std::string open_image_path() {
     return filename;
 }
 
+std::string save_image_path(const std::string &file_type) {
+    const char *file_types = file_type.c_str();
+    nfdchar_t *nfd_filepath = nullptr;
+    NFD_SaveDialog(file_types, nullptr, &nfd_filepath);
+
+    if (nfd_filepath == nullptr)
+        return std::string();
+
+    std::string filename(nfd_filepath);
+    free(nfd_filepath);
+    return filename;
+}
+
 void handle_open_image() {
     std::string filepath = open_image_path();
     if (filepath.empty())
         return;
     std::cout << "Open image: \"" << filepath << "\"" << std::endl;
     images.emplace_back(std::make_shared<Image>(filepath.c_str()));
+}
+
+void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
+    std::string filepath = save_image_path(file_type);
+    if (filepath.empty())
+        return;
+    std::cout << "Save image [" << file_type << "]: \"" << filepath << "\"" << std::endl;
+    image->saveToFile(filepath.c_str(), file_type);
 }
 
 int main(int argc, const char **argv) {
@@ -105,8 +126,8 @@ int main(int argc, const char **argv) {
 
             if (ImGui::BeginMenuBar()) {
                 if (ImGui::BeginMenu("Save")) {
-                    if (ImGui::MenuItem("JPG")) {}
-                    if (ImGui::MenuItem("PNG")) {}
+                    if (ImGui::MenuItem("JPG")) { handle_save_iamge(image, std::string("jpg")); }
+                    if (ImGui::MenuItem("PNG")) { handle_save_iamge(image, std::string("png")); }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
