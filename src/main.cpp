@@ -1,10 +1,18 @@
 #include <iostream>
 #include <string>
+#include <vector>
+#include <memory>
+
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl2.h>
 #include <nfd.h>
+#include <stb_image.h>
+
+#include "image.h"
+
+std::vector<std::shared_ptr<Image>> images;
 
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
@@ -21,6 +29,14 @@ std::string open_image_path() {
     std::string filename(nfd_filepath);
     free(nfd_filepath);
     return filename;
+}
+
+void handle_open_image() {
+    std::string filepath = open_image_path();
+    if (filepath.empty())
+        return;
+    std::cout << "Open image: \"" << filepath << "\"" << std::endl;
+    images.emplace_back(std::make_shared<Image>(filepath.c_str()));
 }
 
 int main(int argc, const char **argv) {
@@ -58,6 +74,8 @@ int main(int argc, const char **argv) {
 
     const ImVec4 clear_color(0.45f, 0.55f, 0.60f, 1.00f);
 
+    // init image variables
+
     // window loop
 
     while (!glfwWindowShouldClose(window)) {
@@ -66,21 +84,12 @@ int main(int argc, const char **argv) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // main window
-
-        int window_w = 0;
-        int window_h = 0;
-        glfwGetFramebufferSize(window, &window_w, &window_h);
-
-        ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(window_w, window_h));
-
         // menu bar
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open image...")) {
-                    std::cout << "Open \"" << open_image_path() << "\"" << std::endl;
+                    handle_open_image();
                 }
 
                 ImGui::Separator();
@@ -88,8 +97,17 @@ int main(int argc, const char **argv) {
             }
         }
 
+        for (std::shared_ptr<Image> image : images) {
+            ImGui::Begin(std::to_string(image->getTextureId()).c_str());
+            ImGui::Image((void *)(intptr_t)image->getTextureId(), ImVec2(image->getImageWidth(), image->getImageHeight()));
+            ImGui::End();
+        }
+
         // rendering
 
+        int window_w = 0;
+        int window_h = 0;
+        glfwGetFramebufferSize(window, &window_w, &window_h);
         glViewport(0, 0, window_w, window_h);
         glClearColor(clear_color.x, clear_color.y, clear_color.z, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
