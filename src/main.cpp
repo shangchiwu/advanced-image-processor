@@ -101,7 +101,17 @@ int main(int argc, const char **argv) {
         }
 
         for (std::shared_ptr<Image> image : images) {
-            ImGui::Begin(std::to_string(image->getTextureId()).c_str());
+            ImGui::Begin(std::to_string(image->getTextureId()).c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+
+            if (ImGui::BeginMenuBar()) {
+                if (ImGui::BeginMenu("Save")) {
+                    if (ImGui::MenuItem("JPG")) {}
+                    if (ImGui::MenuItem("PNG")) {}
+                    ImGui::EndMenu();
+                }
+                ImGui::EndMenuBar();
+            }
+
             ImGui::Image((void *)(intptr_t)image->getTextureId(), ImVec2(image->getImageWidth(), image->getImageHeight()));
             ImGui::End();
         }
