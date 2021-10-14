@@ -49,7 +49,7 @@ void handle_open_image() {
     if (filepath.empty())
         return;
     std::cout << "Open image: \"" << filepath << "\"" << std::endl;
-    images.emplace_back(std::make_shared<Image>(filepath.c_str()));
+    images.emplace_back(std::make_shared<Image>(filepath));
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
@@ -57,7 +57,7 @@ void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &fi
     if (filepath.empty())
         return;
     std::cout << "Save image [" << file_type << "]: \"" << filepath << "\"" << std::endl;
-    image->saveToFile(filepath.c_str(), file_type);
+    image->saveToFile(filepath, file_type);
 }
 
 int main(int argc, const char **argv) {
