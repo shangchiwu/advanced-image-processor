@@ -94,7 +94,10 @@ int main(int argc, const char **argv) {
 
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
+
+                ImGui::EndMenu();
             }
+            ImGui::EndMainMenuBar();
         }
 
         for (std::shared_ptr<Image> image : images) {
