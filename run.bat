@@ -11,7 +11,7 @@ setlocal enabledelayedexpansion
 set printColor=1
 set buildBeforeRun=1
 set runDir=.\build\bin
-set runCommand=.\AdvancedImageProcessor.exe
+set runCommand=.\HW1_61047014S.exe
 
 :: print colors by control chars
 
