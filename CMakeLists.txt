@@ -40,7 +40,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
 # main project
 
-set(TARGET_NAME "HW1 61047014S")
+set(TARGET_NAME "HW1_61047014S")
 
 add_executable(${TARGET_NAME}
     ${IMGUI_SOURCE_FILE}
