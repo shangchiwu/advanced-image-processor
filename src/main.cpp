@@ -71,7 +71,7 @@ int main(int argc, const char **argv) {
         return 1;
     }
 
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Advanced Image Processor", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "AIP 61047014S", nullptr, nullptr);
 
     if (window == nullptr){
         std::cout << "GLFW window initialization failed!" << std::endl;
