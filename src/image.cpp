@@ -97,3 +97,11 @@ void Image::loadToTexture() const {
 #endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _image_w, _image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, _data);
 }
+
+const uint8_t *Image::pixel(int x, int y) const {
+    return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
+}
+
+uint8_t *Image::pixel(int x, int y) {
+    return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
+}

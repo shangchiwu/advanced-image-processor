@@ -6,6 +6,9 @@
 
 class Image {
 public:
+
+    enum Color { R = 0, G, B, A };
+
     Image();
     Image(const Image &other);
     Image(const std::string &filepath);
@@ -20,6 +23,9 @@ public:
     void close();
 
     void loadToTexture() const;
+
+    const uint8_t *pixel(int x, int y) const;
+    uint8_t *pixel(int x, int y);
 
 private:
     int _image_w;
