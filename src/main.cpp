@@ -160,6 +160,19 @@ int main(int argc, const char **argv) {
 
     // init image variables
 
+    images.emplace_back(std::make_shared<Image>("image.png"));
+    images.emplace_back(std::make_shared<Image>(400, 500));
+
+    for (int y = 0; y < images.back()->getImageHeight(); ++y) {
+        for (int x = 0; x < images.back()->getImageWidth(); ++x) {
+            // fill some color
+            images.back()->pixel(x, y)[Image::R] = x * 2 % 40 + y * 57 % 203 - y * int(exp(x) * 4) % 23;
+            images.back()->pixel(x, y)[Image::G] = x * 54 % 87 + int(log(y) * 13) % 147 - y * x * 2 % 76;
+            images.back()->pixel(x, y)[Image::B] = int(atan(x) * 73) % 143 + y * 46 % 86 - y * x * 54 % 31;
+        }
+    }
+    images.back()->loadToTexture();
+
     // window loop
 
     while (!glfwWindowShouldClose(window)) {
