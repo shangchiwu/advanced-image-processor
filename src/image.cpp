@@ -22,6 +22,41 @@ Image::~Image() {
     close();
 }
 
+void Image::init(int width, int height, const uint8_t *data) {
+    // close previous image
+    close();
+
+    _image_w = width;
+    _image_h = height;
+
+    // create pixel data array
+    const int size_in_bytes = 4 * _image_w * _image_h * sizeof(uint8_t);
+    _data = new uint8_t[size_in_bytes];
+
+    if (data == nullptr) {
+        // set default color to white
+        memset(_data, 255, size_in_bytes * sizeof(uint8_t));
+    } else {
+        // copy pixel data
+        memcpy(_data, data, size_in_bytes);
+    }
+
+    // create a OpenGL texture
+    glGenTextures(1, &_texture_id);
+    loadToTexture();
+}
+
+void Image::close() {
+    if (_data != nullptr) {
+        delete [] _data;
+        glDeleteTextures(1, &_texture_id);
+        _image_w = 0;
+        _image_h = 0;
+        _data = nullptr;
+        _texture_id = 0;
+    }
+}
+
 int Image::getImageWidth() const {
     return _image_w;
 }
@@ -42,21 +77,11 @@ bool Image::loadFromFile(const std::string &filepath) {
     if (image_data == nullptr)
         return false;
 
-    // close previous image
+    // init image
     close();
-
-    _image_w = image_w;
-    _image_h = image_h;
-
-    // copy pixel data
-    const int size_in_bytes = 4 * _image_w * _image_h;
-    _data = new uint8_t[size_in_bytes];
-    memcpy(_data, image_data, size_in_bytes);
+    init(image_w, image_h, image_data);
     stbi_image_free(image_data);
 
-    // create a OpenGL texture
-    glGenTextures(1, &_texture_id);
-    loadToTexture();
     return true;
 }
 
@@ -69,17 +94,6 @@ bool Image::saveToFile(const std::string &filepath, const std::string &file_type
         return stbi_write_png(filepath.c_str(), _image_w, _image_h, 4, _data, stride_in_bytes) != 0;
     } else {
         return false;
-    }
-}
-
-void Image::close() {
-    if (_data != nullptr) {
-        delete [] _data;
-        glDeleteTextures(1, &_texture_id);
-        _image_w = 0;
-        _image_h = 0;
-        _data = nullptr;
-        _texture_id = 0;
     }
 }
 

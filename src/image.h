@@ -14,13 +14,15 @@ public:
     Image(const std::string &filepath);
     ~Image();
 
+    void init(int width, int height, const uint8_t *data=nullptr);
+    void close();
+
     int getImageWidth() const;
     int getImageHeight() const;
     GLuint getTextureId() const;
 
     bool loadFromFile(const std::string &filepath);
     bool saveToFile(const std::string &filepath, const std::string &file_type) const;
-    void close();
 
     void loadToTexture() const;
 
