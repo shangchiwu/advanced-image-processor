@@ -193,6 +193,10 @@ int main(int argc, const char **argv) {
                     if (ImGui::MenuItem("PNG")) { handle_save_iamge(image, std::string("png")); }
                     ImGui::EndMenu();
                 }
+                if (ImGui::BeginMenu("Analyze")) {
+                    if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image); }
+                    ImGui::EndMenu();
+                }
                 ImGui::EndMenuBar();
             }
 
