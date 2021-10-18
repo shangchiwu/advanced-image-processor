@@ -11,6 +11,7 @@ public:
 
     Image();
     Image(const Image &other) = delete;
+    Image(int width, int height, const uint8_t *data=nullptr);
     Image(const std::string &filepath);
     ~Image();
 
