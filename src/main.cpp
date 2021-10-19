@@ -168,7 +168,9 @@ int main(int argc, const char **argv) {
 
     // init image variables
 
-    images.emplace_back(std::make_shared<Image>("image.png"));
+    std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
+    if (images.back()->good())
+        images.emplace_back(default_image);
     images.emplace_back(std::make_shared<Image>(400, 500));
 
     for (int y = 0; y < images.back()->getImageHeight(); ++y) {
