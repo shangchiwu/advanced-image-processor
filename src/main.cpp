@@ -169,7 +169,7 @@ int main(int argc, const char **argv) {
     // init image variables
 
     std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
-    if (images.back()->good())
+    if (default_image->good())
         images.emplace_back(default_image);
     images.emplace_back(std::make_shared<Image>(400, 500));
 
