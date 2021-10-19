@@ -101,6 +101,10 @@ bool Image::saveToFile(const std::string &filepath, const std::string &file_type
     }
 }
 
+bool Image::good() const {
+    return _data != nullptr;
+}
+
 void Image::loadToTexture() const {
     // use texture
     glBindTexture(GL_TEXTURE_2D, _texture_id);

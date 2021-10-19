@@ -48,10 +48,18 @@ std::string save_image_path(const std::string &file_type) {
 
 void handle_open_image() {
     std::string filepath = open_image_path();
-    if (filepath.empty())
+    if (filepath.empty()) {
+        std::cout << "Open image canceled." << std::endl;
         return;
+    }
+
     std::cout << "Open image: \"" << filepath << "\"" << std::endl;
-    images.emplace_back(std::make_shared<Image>(filepath));
+    std::shared_ptr<Image> image = std::make_shared<Image>(filepath);
+    if (!image->good()) {
+        std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
+        return;
+    }
+    images.emplace_back(image);
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {

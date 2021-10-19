@@ -25,6 +25,8 @@ public:
     bool loadFromFile(const std::string &filepath);
     bool saveToFile(const std::string &filepath, const std::string &file_type) const;
 
+    bool good() const;
+
     void loadToTexture() const;
 
     const uint8_t *pixel(int x, int y) const;
