@@ -76,28 +76,39 @@ uint8_t to_gray_average(const uint8_t *pixel) {
     return a;
 }
 
-std::shared_ptr<float[]> generate_gray_histogram(const std::shared_ptr<Image> image) {
-    // count each level
+void generate_gray_image_and_histogram(const std::shared_ptr<Image> image, std::shared_ptr<Image> out_image, float *histogram) {
+    if (out_image != nullptr)
+        out_image->init(image->getImageWidth(), image->getImageHeight());
+
     int level_count[256] = {};
 
+    // transform to gray scale
     for (int y = 0; y < image->getImageHeight(); ++y) {
         for (int x = 0; x < image->getImageWidth(); ++x) {
-            ++level_count[to_gray_average(image->pixel(x, y))];
+            const uint8_t gray_level = to_gray_average(image->pixel(x, y));
+            ++level_count[gray_level];
+            if (out_image != nullptr) {
+                out_image->pixel(x, y)[Image::R] = gray_level;
+                out_image->pixel(x, y)[Image::G] = gray_level;
+                out_image->pixel(x, y)[Image::B] = gray_level;
+            }
         }
     }
-
-    // normalize
-    std::shared_ptr<float[]> histogram(new float[256]);
-    const int max_num = *std::max_element(level_count, level_count + 256);
-
-    for (int i = 0; i < 256; ++i) {
-        histogram[i] = (double) level_count[i] / max_num;
+    if (out_image != nullptr) {
+        out_image->loadToTexture();
     }
 
-    return histogram;
+    // normalize histogram
+    if (histogram != nullptr) {
+        const int max_num = *std::max_element(level_count, level_count + 256);
+
+        for (int i = 0; i < 256; ++i) {
+            histogram[i] = (double) level_count[i] / max_num;
+        }
+    }
 }
 
-std::shared_ptr<Image> generate_histogram_image(const std::shared_ptr<float[]> histogram) {
+std::shared_ptr<Image> generate_histogram_image(const float *histogram) {
     constexpr int image_size = 300;
     std::shared_ptr<Image> image = std::make_shared<Image>(image_size, image_size);
 
@@ -125,7 +136,11 @@ std::shared_ptr<Image> generate_histogram_image(const std::shared_ptr<float[]> h
 
 void handle_gray_histogram(const std::shared_ptr<Image> image) {
     std::cout << "compute histogram" << std::endl;
-    const std::shared_ptr<float[]> histogram = generate_gray_histogram(image);
+    std::shared_ptr<Image> gray_image = std::make_shared<Image>();
+    float histogram[256] = {};
+    generate_gray_image_and_histogram(image, gray_image, histogram);
+    images.emplace_back(gray_image);
+
     std::cout << "generate histogram image" << std::endl;
     const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
     images.emplace_back(histogram_image);
