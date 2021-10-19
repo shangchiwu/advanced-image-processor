@@ -17,20 +17,18 @@ public:
 
     void init(int width, int height, const uint8_t *data=nullptr);
     void close();
-
-    int getImageWidth() const;
-    int getImageHeight() const;
-    GLuint getTextureId() const;
+    bool good() const;
 
     bool loadFromFile(const std::string &filepath);
     bool saveToFile(const std::string &filepath, const std::string &file_type) const;
 
-    bool good() const;
-
-    void loadToTexture() const;
-
+    int getImageWidth() const;
+    int getImageHeight() const;
     const uint8_t *pixel(int x, int y) const;
     uint8_t *pixel(int x, int y);
+
+    void loadToTexture() const;
+    GLuint getTextureId() const;
 
 private:
     int _image_w;
