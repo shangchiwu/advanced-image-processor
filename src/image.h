@@ -19,6 +19,8 @@ public:
     bool saveToFile(const std::string &filepath, const std::string &file_type) const;
     void close();
 
+    bool good() const;
+
     void loadToTexture() const;
 
 private:
