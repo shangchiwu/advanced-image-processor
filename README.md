@@ -2,17 +2,19 @@
 
 The image editor used in the Advanced Image Processing course.
 
-The Advanced Image Processor is a simple image editor, which is written in C++ 17 and runs on Windows, and can be compiled into single executable.
+The Advanced Image Processor is a simple image editor, which is written in C++17 and runs on Windows, and can be compiled into single executable.
 
 ## Features
 
 ### Image File Formats
 
-The Advanced Image Processor supports opening the following image file formats: BMP, GIF, JPEG, PNG, PPM (P5, P6). And save image to JPG or PNG image file.
+- Open: BMP, GIF, JPEG, PNG, PPM (P5 and P6)
+- Save: JPG, PNG
 
 ### Functions
 
 - Open and save image to another formats.
+- Convert a image to gray scale and show its histogram.
 - ...and more features in the future.
 
 ## Dependencies
