@@ -1,3 +1,5 @@
+#include <math.h>
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -46,10 +48,18 @@ std::string save_image_path(const std::string &file_type) {
 
 void handle_open_image() {
     std::string filepath = open_image_path();
-    if (filepath.empty())
+    if (filepath.empty()) {
+        std::cout << "Open image canceled." << std::endl;
         return;
+    }
+
     std::cout << "Open image: \"" << filepath << "\"" << std::endl;
-    images.emplace_back(std::make_shared<Image>(filepath));
+    std::shared_ptr<Image> image = std::make_shared<Image>(filepath);
+    if (!image->good()) {
+        std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
+        return;
+    }
+    images.emplace_back(image);
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
@@ -58,6 +68,82 @@ void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &fi
         return;
     std::cout << "Save image [" << file_type << "]: \"" << filepath << "\"" << std::endl;
     image->saveToFile(filepath, file_type);
+}
+
+uint8_t to_gray_average(const uint8_t *pixel) {
+    int a = round((((int) pixel[Image::R]) + ((int) pixel[Image::G]) + ((int) pixel[Image::B])) / 3.0f);
+    // std::cout << a << std::endl;
+    return a;
+}
+
+void generate_gray_image_and_histogram(const std::shared_ptr<Image> image, std::shared_ptr<Image> out_image, float *histogram) {
+    if (out_image != nullptr)
+        out_image->init(image->getImageWidth(), image->getImageHeight());
+
+    int level_count[256] = {};
+
+    // transform to gray scale
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            const uint8_t gray_level = to_gray_average(image->pixel(x, y));
+            ++level_count[gray_level];
+            if (out_image != nullptr) {
+                out_image->pixel(x, y)[Image::R] = gray_level;
+                out_image->pixel(x, y)[Image::G] = gray_level;
+                out_image->pixel(x, y)[Image::B] = gray_level;
+            }
+        }
+    }
+    if (out_image != nullptr) {
+        out_image->loadToTexture();
+    }
+
+    // normalize histogram
+    if (histogram != nullptr) {
+        const int max_num = *std::max_element(level_count, level_count + 256);
+
+        for (int i = 0; i < 256; ++i) {
+            histogram[i] = (double) level_count[i] / max_num;
+        }
+    }
+}
+
+std::shared_ptr<Image> generate_histogram_image(const float *histogram) {
+    constexpr int image_size = 300;
+    std::shared_ptr<Image> image = std::make_shared<Image>(image_size, image_size);
+
+    // draw the histogram
+    constexpr int histogram_start = (image_size - 256) / 2;
+    constexpr int histogram_end = histogram_start + 256;
+    for (int level = 0; level < 256; ++level) {
+        const int h = histogram_start + 256 * (1.0f - histogram[level]);
+        // draw background
+        for (int y = histogram_start; y < h; ++y) {
+            image->pixel(histogram_start + level, y)[Image::R] = 127;
+            image->pixel(histogram_start + level, y)[Image::G] = 127;
+            image->pixel(histogram_start + level, y)[Image::B] = 127;
+        }
+        // draw bar
+        for (int y = h; y < histogram_end; ++y) {
+            image->pixel(histogram_start + level, y)[Image::R] = 0;
+            image->pixel(histogram_start + level, y)[Image::G] = 0;
+            image->pixel(histogram_start + level, y)[Image::B] = 0;
+        }
+    }
+    image->loadToTexture();
+    return image;
+}
+
+void handle_gray_histogram(const std::shared_ptr<Image> image) {
+    std::cout << "compute histogram" << std::endl;
+    std::shared_ptr<Image> gray_image = std::make_shared<Image>();
+    float histogram[256] = {};
+    generate_gray_image_and_histogram(image, gray_image, histogram);
+    images.emplace_back(gray_image);
+
+    std::cout << "generate histogram image" << std::endl;
+    const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
+    images.emplace_back(histogram_image);
 }
 
 int main(int argc, const char **argv) {
@@ -97,6 +183,21 @@ int main(int argc, const char **argv) {
 
     // init image variables
 
+    std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
+    if (default_image->good())
+        images.emplace_back(default_image);
+    images.emplace_back(std::make_shared<Image>(400, 500));
+
+    for (int y = 0; y < images.back()->getImageHeight(); ++y) {
+        for (int x = 0; x < images.back()->getImageWidth(); ++x) {
+            // fill some color
+            images.back()->pixel(x, y)[Image::R] = x * 2 % 40 + y * 57 % 203 - y * int(exp(x) * 4) % 23;
+            images.back()->pixel(x, y)[Image::G] = x * 54 % 87 + int(log(y) * 13) % 147 - y * x * 2 % 76;
+            images.back()->pixel(x, y)[Image::B] = int(atan(x) * 73) % 143 + y * 46 % 86 - y * x * 54 % 31;
+        }
+    }
+    images.back()->loadToTexture();
+
     // window loop
 
     while (!glfwWindowShouldClose(window)) {
@@ -128,6 +229,10 @@ int main(int argc, const char **argv) {
                 if (ImGui::BeginMenu("Save")) {
                     if (ImGui::MenuItem("JPG")) { handle_save_iamge(image, std::string("jpg")); }
                     if (ImGui::MenuItem("PNG")) { handle_save_iamge(image, std::string("png")); }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Analyze")) {
+                    if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image); }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
