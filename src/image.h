@@ -6,22 +6,29 @@
 
 class Image {
 public:
+
+    enum Color { R = 0, G, B, A };
+
     Image();
-    Image(const Image &other);
+    Image(const Image &other) = delete;
+    Image(int width, int height, const uint8_t *data=nullptr);
     Image(const std::string &filepath);
     ~Image();
 
-    int getImageWidth() const;
-    int getImageHeight() const;
-    GLuint getTextureId() const;
+    void init(int width, int height, const uint8_t *data=nullptr);
+    void close();
+    bool good() const;
 
     bool loadFromFile(const std::string &filepath);
     bool saveToFile(const std::string &filepath, const std::string &file_type) const;
-    void close();
 
-    bool good() const;
+    int getImageWidth() const;
+    int getImageHeight() const;
+    const uint8_t *pixel(int x, int y) const;
+    uint8_t *pixel(int x, int y);
 
     void loadToTexture() const;
+    GLuint getTextureId() const;
 
 private:
     int _image_w;
