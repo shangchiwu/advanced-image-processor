@@ -83,6 +83,10 @@ void Image::close() {
     }
 }
 
+bool Image::good() const {
+    return _data != nullptr;
+}
+
 void Image::loadToTexture() const {
     // use texture
     glBindTexture(GL_TEXTURE_2D, _texture_id);
