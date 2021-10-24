@@ -1,9 +1,10 @@
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <memory>
+#include <numbers>
 #include <string>
 #include <vector>
-#include <memory>
 
 #include <GLFW/glfw3.h>
 #include <imgui.h>
@@ -13,6 +14,7 @@
 #include <stb_image.h>
 
 #include "image.h"
+#include "utility.h"
 
 std::vector<std::shared_ptr<Image>> images;
 
@@ -146,6 +148,76 @@ void handle_gray_histogram(const std::shared_ptr<Image> image) {
     images.emplace_back(histogram_image);
 }
 
+void generate_gaussian_noise(float *out_noise, int count, float sigma) {
+    using std::numbers::pi;
+
+    for (int i = 0; i < count; i += 2) {
+        // generate uniform random number pairs
+        const double r = random_float();
+        const double phi = random_float();
+
+        // Box-Muller transform
+        const double ln_r = (r == 0.) ? 0. : log(r);
+        const double z1 = sigma * cos(2. * pi * phi) * sqrt(-2. * ln_r);
+        const double z2 = sigma * sin(2. * pi * phi) * sqrt(-2. * ln_r);
+
+        // save noise
+        out_noise[i] = z1;
+        if (i + 1 < count)
+            out_noise[i + 1] = z2;
+    }
+}
+
+void generate_histogram_from_array(const float *noise, int count, float *histogram) {
+    int level_count[256] = {};
+
+    // transform to gray scale
+    for (int i = 0; i < count; ++i) {
+        const uint8_t gray_level = 255 * clamp(noise[i], 0.f, 1.f);
+        ++level_count[gray_level];
+    }
+
+    // normalize histogram
+    const int max_num = *std::max_element(level_count, level_count + 256);
+    for (int i = 0; i < 256; ++i) {
+        histogram[i] = (double) level_count[i] / max_num;
+    }
+}
+
+void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
+    const float sigma_normalized = sigma / 255.f;
+
+    // generate noise
+    const int num_pixels = image->getImageWidth() * image->getImageHeight();
+    float *noise = new float[num_pixels];
+    generate_gaussian_noise(noise, num_pixels, sigma_normalized);
+
+    // generate image with noise added
+    std::shared_ptr<Image> image_with_noise = std::make_shared<Image>(image->getImageWidth(), image->getImageHeight());
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            const int i = y * image->getImageWidth() + x;
+            image_with_noise->pixel(x, y)[Image::R] = clamp(image->pixel(x, y)[Image::R] + 255 * noise[i], 0.f, 255.f);
+            image_with_noise->pixel(x, y)[Image::G] = clamp(image->pixel(x, y)[Image::G] + 255 * noise[i], 0.f, 255.f);
+            image_with_noise->pixel(x, y)[Image::B] = clamp(image->pixel(x, y)[Image::B] + 255 * noise[i], 0.f, 255.f);
+            image_with_noise->pixel(x, y)[Image::A] = image->pixel(x, y)[Image::A];
+        }
+    }
+    image_with_noise->loadToTexture();
+    images.emplace_back(image_with_noise);
+
+    // draw histogram of noise
+    for (int i = 0; i < num_pixels; ++i)
+        noise[i] += 0.5f;
+    float histogram[256] = {};
+    generate_histogram_from_array(noise, num_pixels, histogram);
+    std::shared_ptr<Image> noise_histogram_image = generate_histogram_image(histogram);
+    images.emplace_back(noise_histogram_image);
+
+    // clean
+    delete [] noise;
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -233,6 +305,10 @@ int main(int argc, const char **argv) {
                 }
                 if (ImGui::BeginMenu("Analyze")) {
                     if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image); }
+                    ImGui::EndMenu();
+                }
+                if (ImGui::BeginMenu("Operation")) {
+                    if (ImGui::MenuItem("Gaussian Noise")) { handle_gaussian_noise(image, 32); }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
