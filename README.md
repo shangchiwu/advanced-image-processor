@@ -15,6 +15,7 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 
 - Open and save image to another formats.
 - Convert a image to gray scale and show its histogram.
+- Apply gaussian noise on an image with adjustable sigma.
 - ...and more features in the future.
 
 ## Dependencies
