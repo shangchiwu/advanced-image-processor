@@ -10,7 +10,7 @@ public:
     enum Color { R = 0, G, B, A };
 
     Image();
-    Image(const Image &other) = delete;
+    Image(const Image &other);
     Image(int width, int height, const uint8_t *data=nullptr);
     Image(const std::string &filepath);
     ~Image();

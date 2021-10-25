@@ -14,6 +14,8 @@
 
 Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _texture_id(0) {}
 
+Image::Image(const Image &other): Image(other._image_w, other._image_h, other._data) {}
+
 Image::Image(int width, int height, const uint8_t *data) : Image() {
     init(width, height, data);
 }
