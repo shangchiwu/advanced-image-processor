@@ -308,7 +308,15 @@ int main(int argc, const char **argv) {
                     ImGui::EndMenu();
                 }
                 if (ImGui::BeginMenu("Operation")) {
-                    if (ImGui::MenuItem("Gaussian Noise")) { handle_gaussian_noise(image, 32); }
+                    if (ImGui::BeginMenu("Gaussian Noise")) {
+                        static int sigma = 32;
+                        constexpr float drag_speed = 0.2f;
+                        ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
+                        if (ImGui::Button("Apply")) {
+                            handle_gaussian_noise(image, sigma);
+                        }
+                        ImGui::EndMenu();
+                    }
                     ImGui::EndMenu();
                 }
                 ImGui::EndMenuBar();
