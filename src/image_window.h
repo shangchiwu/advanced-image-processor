@@ -20,7 +20,7 @@ public:
     std::shared_ptr<Image> getImage();
     void setImage(std::shared_ptr<Image> image);
 
-    ImVec2 getImageRenderSize() const;
+    ImVec2 computeImageRenderSize(const ImVec2 &window_size) const;
 
 private:
     std::shared_ptr<Image> _image;

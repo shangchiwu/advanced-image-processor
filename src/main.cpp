@@ -341,8 +341,9 @@ int main(int argc, const char **argv) {
 
                 // draw image
                 ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
-                    ImVec2(image_window->getImage()->getImageWidth(),
-                        image_window->getImage()->getImageHeight()));
+                    image_window->computeImageRenderSize(ImVec2(
+                        ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
+                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)));
             }
             ImGui::End();
         }
