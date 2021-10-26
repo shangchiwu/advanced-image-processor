@@ -297,9 +297,20 @@ int main(int argc, const char **argv) {
             ImGui::EndMainMenuBar();
         }
 
-        for (std::shared_ptr<ImageWindow> image_window : image_windows) {
-            ImGui::Begin(std::to_string(image_window->getImage()->getTextureId()).c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+        for (int i = 0; i < image_windows.size(); ++i) {
+            std::shared_ptr<ImageWindow> image_window = image_windows[i];
 
+            // image window
+            ImGui::Begin(std::to_string(image_window->getImage()->getTextureId()).c_str(),
+                    &image_window->is_open, ImGuiWindowFlags_MenuBar);
+
+            // check should close
+            if (!image_window->is_open) {
+                image_windows.erase(image_windows.begin() + i);
+                continue;
+            }
+
+            // menu bar
             if (ImGui::BeginMenuBar()) {
                 if (ImGui::BeginMenu("Save")) {
                     if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
@@ -325,9 +336,11 @@ int main(int argc, const char **argv) {
                 ImGui::EndMenuBar();
             }
 
+            // draw image
             ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
                 ImVec2(image_window->getImage()->getImageWidth(),
                        image_window->getImage()->getImageHeight()));
+
             ImGui::End();
         }
 
