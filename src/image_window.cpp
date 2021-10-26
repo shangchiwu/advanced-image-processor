@@ -7,7 +7,7 @@
 #include "image.h"
 
 ImageWindow::ImageWindow(std::shared_ptr<Image> image) :
-        is_expanded(true), is_open(true), scale_type(SCALE_ORIGINAL), _image(image) {}
+        is_expanded(true), is_open(true), scale_type(SCALE_ORIGINAL), scale_factor(1.f), _image(image) {}
 
 const std::shared_ptr<Image> ImageWindow::getImage() const {
     return _image;
@@ -24,6 +24,9 @@ void ImageWindow::setImage(std::shared_ptr<Image> image) {
 ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
     if (scale_type == SCALE_ORIGINAL)
         return ImVec2(_image->getImageWidth(), _image->getImageHeight());
+
+    if (scale_type == SCALE_CUSTOM_SCALE)
+        return ImVec2(scale_factor * _image->getImageWidth(), scale_factor * _image->getImageHeight());
 
     if (scale_type == SCALE_FILL)
         return ImVec2(window_size.x, window_size.y);

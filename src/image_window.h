@@ -22,6 +22,7 @@ public:
     bool is_expanded;
     bool is_open;
     ScaleType scale_type;
+    float scale_factor;
 
     ImageWindow(std::shared_ptr<Image> image = nullptr);
     ImageWindow(const Image &other) = delete;
