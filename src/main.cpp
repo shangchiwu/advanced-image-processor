@@ -321,13 +321,13 @@ int main(int argc, const char **argv) {
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Zoom")) {
-                        ImGui::RadioButton("Original",   (int *) &image_window->scale_type, ImageWindow::SCALE_ORIGINAL);
-                        ImGui::RadioButton("Fill",       (int *) &image_window->scale_type, ImageWindow::SCALE_FILL);
-                        ImGui::RadioButton("Fit Width",  (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WIDTH);
-                        ImGui::RadioButton("Fit Height", (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_HEIGHT);
-                        ImGui::RadioButton("Fit Window", (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WINDOW);
-
+                        ImGui::RadioButton("Original",      (int *) &image_window->scale_type, ImageWindow::SCALE_ORIGINAL);
+                        ImGui::RadioButton("Fill",          (int *) &image_window->scale_type, ImageWindow::SCALE_FILL);
+                        ImGui::RadioButton("Fit Width",     (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WIDTH);
+                        ImGui::RadioButton("Fit Height",    (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_HEIGHT);
+                        ImGui::RadioButton("Fit Window",    (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WINDOW);
                         ImGui::RadioButton("Custom Scale:", (int *) &image_window->scale_type, ImageWindow::SCALE_CUSTOM_SCALE);
+                        ImGui::SameLine();
 
                         constexpr float scale_button_step = 1.25f;
                         if (ImGui::Button("-##scale_up")) {
@@ -335,10 +335,12 @@ int main(int argc, const char **argv) {
                             image_window->scale_factor /= scale_button_step;
                         }
                         ImGui::SameLine();
+                        ImGui::PushItemWidth(80.f);
                         if (ImGui::DragFloat("##zoom_scale", &image_window->scale_factor,
                                 4.f, 0.001f, 10000.f, nullptr, ImGuiSliderFlags_Logarithmic)) {
                             image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
                         }
+                        ImGui::PopItemWidth();
                         ImGui::SameLine();
                         if (ImGui::Button("+##scale_down")) {
                             image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;

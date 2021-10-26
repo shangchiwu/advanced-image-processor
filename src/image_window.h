@@ -16,7 +16,7 @@ public:
         SCALE_FIT_WIDTH,
         SCALE_FIT_HEIGHT,
         SCALE_FIT_WINDOW,
-        SCALE_CUSTOM_SCALE // TODO
+        SCALE_CUSTOM_SCALE
     };
 
     bool is_expanded;
