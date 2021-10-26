@@ -6,7 +6,8 @@
 
 #include "image.h"
 
-ImageWindow::ImageWindow(std::shared_ptr<Image> image) : _image(image), zoom_factor(1.f), is_open(true) {}
+ImageWindow::ImageWindow(std::shared_ptr<Image> image) : _image(image), zoom_factor(1.f),
+        is_expanded(true), is_open(true) {}
 
 const std::shared_ptr<Image> ImageWindow::getImage() const {
     return _image;

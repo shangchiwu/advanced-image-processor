@@ -1,8 +1,6 @@
 #ifndef ADVANCED_IMAGE_PROCESSOR_IMAGE_WINDOW_H__
 #define ADVANCED_IMAGE_PROCESSOR_IMAGE_WINDOW_H__
 
-#include <string>
-#include <GL/gl.h>
 #include <memory>
 
 #include "imgui.h"
@@ -12,6 +10,7 @@
 class ImageWindow {
 public:
     float zoom_factor;
+    bool is_expanded;
     bool is_open;
 
     ImageWindow(std::shared_ptr<Image> image = nullptr);

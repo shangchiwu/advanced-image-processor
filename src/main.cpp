@@ -301,8 +301,10 @@ int main(int argc, const char **argv) {
             std::shared_ptr<ImageWindow> image_window = image_windows[i];
 
             // image window
-            ImGui::Begin(std::to_string(image_window->getImage()->getTextureId()).c_str(),
-                    &image_window->is_open, ImGuiWindowFlags_MenuBar);
+            ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
+            image_window->is_expanded = ImGui::Begin(
+                std::to_string(image_window->getImage()->getTextureId()).c_str(),
+                &image_window->is_open, ImGuiWindowFlags_MenuBar);
 
             // check should close
             if (!image_window->is_open) {
@@ -310,37 +312,38 @@ int main(int argc, const char **argv) {
                 continue;
             }
 
-            // menu bar
-            if (ImGui::BeginMenuBar()) {
-                if (ImGui::BeginMenu("Save")) {
-                    if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
-                    if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
-                    ImGui::EndMenu();
-                }
-                if (ImGui::BeginMenu("Analyze")) {
-                    if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image_window->getImage()); }
-                    ImGui::EndMenu();
-                }
-                if (ImGui::BeginMenu("Operation")) {
-                    if (ImGui::BeginMenu("Gaussian Noise")) {
-                        static int sigma = 32;
-                        constexpr float drag_speed = 0.2f;
-                        ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
-                        if (ImGui::Button("Apply")) {
-                            handle_gaussian_noise(image_window->getImage(), sigma);
+            if (image_window->is_expanded) {
+                // menu bar
+                if (ImGui::BeginMenuBar()) {
+                    if (ImGui::BeginMenu("Save")) {
+                        if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
+                        if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Analyze")) {
+                        if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image_window->getImage()); }
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Operation")) {
+                        if (ImGui::BeginMenu("Gaussian Noise")) {
+                            static int sigma = 32;
+                            constexpr float drag_speed = 0.2f;
+                            ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
+                            if (ImGui::Button("Apply")) {
+                                handle_gaussian_noise(image_window->getImage(), sigma);
+                            }
+                            ImGui::EndMenu();
                         }
                         ImGui::EndMenu();
                     }
-                    ImGui::EndMenu();
+                    ImGui::EndMenuBar();
                 }
-                ImGui::EndMenuBar();
+
+                // draw image
+                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
+                    ImVec2(image_window->getImage()->getImageWidth(),
+                        image_window->getImage()->getImageHeight()));
             }
-
-            // draw image
-            ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
-                ImVec2(image_window->getImage()->getImageWidth(),
-                       image_window->getImage()->getImageHeight()));
-
             ImGui::End();
         }
 
