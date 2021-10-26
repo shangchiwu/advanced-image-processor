@@ -304,7 +304,7 @@ int main(int argc, const char **argv) {
             ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
             image_window->is_expanded = ImGui::Begin(
                 std::to_string(image_window->getImage()->getTextureId()).c_str(),
-                &image_window->is_open, ImGuiWindowFlags_MenuBar);
+                &image_window->is_open, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
 
             // check should close
             if (!image_window->is_open) {
@@ -318,6 +318,14 @@ int main(int argc, const char **argv) {
                     if (ImGui::BeginMenu("Save")) {
                         if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
                         if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Zoom")) {
+                        ImGui::RadioButton("Original",   (int *) &image_window->scale_type, ImageWindow::SCALE_ORIGINAL);
+                        ImGui::RadioButton("Fill",       (int *) &image_window->scale_type, ImageWindow::SCALE_FILL);
+                        ImGui::RadioButton("Fit Width",  (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WIDTH);
+                        ImGui::RadioButton("Fit Height", (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_HEIGHT);
+                        ImGui::RadioButton("Fit Window", (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WINDOW);
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Analyze")) {
