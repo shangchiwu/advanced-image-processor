@@ -259,7 +259,7 @@ int main(int argc, const char **argv) {
 
     std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
     if (default_image->good())
-        image_windows.emplace_back(std::make_shared<ImageWindow>(default_image));
+        image_windows.emplace_back(std::make_shared<ImageWindow>(default_image, "default image.png"));
 
     std::shared_ptr<Image> formula_image = std::make_shared<Image>(400, 500);
     for (int y = 0; y < formula_image->getImageHeight(); ++y) {
@@ -271,7 +271,7 @@ int main(int argc, const char **argv) {
         }
     }
     formula_image->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(formula_image));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(formula_image, "default math formula image"));
 
     // window loop
 
@@ -303,8 +303,9 @@ int main(int argc, const char **argv) {
             // image window
             ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
             image_window->is_expanded = ImGui::Begin(
-                std::to_string(image_window->getImage()->getTextureId()).c_str(),
-                &image_window->is_open, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
+                image_window->getUiTitle(),
+                &image_window->is_open,
+                ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
 
             // check should close
             if (!image_window->is_open) {

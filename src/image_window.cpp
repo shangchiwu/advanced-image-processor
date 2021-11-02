@@ -5,9 +5,15 @@
 #include <imgui.h>
 
 #include "image.h"
+#include "utility.h"
 
-ImageWindow::ImageWindow(std::shared_ptr<Image> image) :
-        is_expanded(true), is_open(true), scale_type(SCALE_ORIGINAL), scale_factor(1.f), _image(image) {}
+int ImageWindow::_prev_id = 0;
+
+ImageWindow::ImageWindow(std::shared_ptr<Image> image, const std::string &title) :
+        is_expanded(true), is_open(true), scale_type(SCALE_ORIGINAL), scale_factor(1.f),
+        _id(++_prev_id), _image(image) {
+    setTitle(title);
+}
 
 const std::shared_ptr<Image> ImageWindow::getImage() const {
     return _image;
@@ -19,6 +25,19 @@ std::shared_ptr<Image> ImageWindow::getImage() {
 
 void ImageWindow::setImage(std::shared_ptr<Image> image) {
     _image = image;
+}
+
+std::string ImageWindow::getTitle() const {
+    return _title;
+}
+
+const char *ImageWindow::getUiTitle() const {
+    return _ui_title.c_str();
+}
+
+void ImageWindow::setTitle(const std::string &title) {
+    _title = title;
+    _ui_title = title + "###image-window-" + std::to_string(_id);
 }
 
 ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
