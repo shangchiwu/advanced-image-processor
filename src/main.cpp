@@ -62,7 +62,7 @@ void handle_open_image() {
         std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
@@ -142,11 +142,11 @@ void handle_gray_histogram(const std::shared_ptr<Image> image) {
     std::shared_ptr<Image> gray_image = std::make_shared<Image>();
     float histogram[256] = {};
     generate_gray_image_and_histogram(image, gray_image, histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(gray_image));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(gray_image, "gray image"));
 
     std::cout << "generate histogram image" << std::endl;
     const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(histogram_image));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(histogram_image, "gray histogram"));
 }
 
 void generate_gaussian_noise(float *out_noise, int count, float sigma) {
@@ -205,7 +205,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
         }
     }
     image_with_noise->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image_with_noise));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image_with_noise, "image with noise"));
 
     // draw histogram of noise
     for (int i = 0; i < num_pixels; ++i)
@@ -213,7 +213,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
     float histogram[256] = {};
     generate_histogram_from_array(noise, num_pixels, histogram);
     std::shared_ptr<Image> noise_histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(noise_histogram_image));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(noise_histogram_image, "noise histogram"));
 
     // clean
     delete [] noise;
