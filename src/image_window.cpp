@@ -63,3 +63,13 @@ ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
 
     return ImVec2(0.f, 0.f);
 }
+
+ImVec2 ImageWindow::computeDefaultPosition() const {
+    constexpr float offset = 40.f;
+    constexpr float step = 20.f;
+    constexpr int max_step = 20;
+
+    return ImVec2(
+        offset + _id % max_step * step,
+        offset + _id % max_step * step);
+}

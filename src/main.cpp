@@ -301,6 +301,7 @@ int main(int argc, const char **argv) {
             std::shared_ptr<ImageWindow> image_window = image_windows[i];
 
             // image window
+            ImGui::SetNextWindowPos(image_window->computeDefaultPosition(), ImGuiCond_Appearing);
             ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
             image_window->is_expanded = ImGui::Begin(
                 image_window->getUiTitle(),

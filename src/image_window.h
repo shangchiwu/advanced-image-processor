@@ -36,6 +36,7 @@ public:
     void setTitle(const std::string &title);
 
     ImVec2 computeImageRenderSize(const ImVec2 &window_size=ImVec2()) const;
+    ImVec2 computeDefaultPosition() const;
 
 private:
     static int _prev_id;
