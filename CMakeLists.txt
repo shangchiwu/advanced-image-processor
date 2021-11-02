@@ -47,6 +47,7 @@ add_executable(${TARGET_NAME}
 
     src/main.cpp
     src/image.cpp
+    src/image_window.cpp
     src/utility.cpp
 )
 

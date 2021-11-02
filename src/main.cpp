@@ -14,9 +14,10 @@
 #include <stb_image.h>
 
 #include "image.h"
+#include "image_window.h"
 #include "utility.h"
 
-std::vector<std::shared_ptr<Image>> images;
+std::vector<std::shared_ptr<ImageWindow>> image_windows;
 
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
@@ -61,7 +62,7 @@ void handle_open_image() {
         std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
-    images.emplace_back(image);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
@@ -141,11 +142,11 @@ void handle_gray_histogram(const std::shared_ptr<Image> image) {
     std::shared_ptr<Image> gray_image = std::make_shared<Image>();
     float histogram[256] = {};
     generate_gray_image_and_histogram(image, gray_image, histogram);
-    images.emplace_back(gray_image);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(gray_image, "gray image"));
 
     std::cout << "generate histogram image" << std::endl;
     const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
-    images.emplace_back(histogram_image);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(histogram_image, "gray histogram"));
 }
 
 void generate_gaussian_noise(float *out_noise, int count, float sigma) {
@@ -204,7 +205,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
         }
     }
     image_with_noise->loadToTexture();
-    images.emplace_back(image_with_noise);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image_with_noise, "image with noise"));
 
     // draw histogram of noise
     for (int i = 0; i < num_pixels; ++i)
@@ -212,7 +213,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
     float histogram[256] = {};
     generate_histogram_from_array(noise, num_pixels, histogram);
     std::shared_ptr<Image> noise_histogram_image = generate_histogram_image(histogram);
-    images.emplace_back(noise_histogram_image);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(noise_histogram_image, "noise histogram"));
 
     // clean
     delete [] noise;
@@ -246,6 +247,7 @@ int main(int argc, const char **argv) {
     ImGui::CreateContext();
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.IniFilename = nullptr;
 
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -257,18 +259,19 @@ int main(int argc, const char **argv) {
 
     std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
     if (default_image->good())
-        images.emplace_back(default_image);
-    images.emplace_back(std::make_shared<Image>(400, 500));
+        image_windows.emplace_back(std::make_shared<ImageWindow>(default_image, "default image.png"));
 
-    for (int y = 0; y < images.back()->getImageHeight(); ++y) {
-        for (int x = 0; x < images.back()->getImageWidth(); ++x) {
+    std::shared_ptr<Image> formula_image = std::make_shared<Image>(400, 500);
+    for (int y = 0; y < formula_image->getImageHeight(); ++y) {
+        for (int x = 0; x < formula_image->getImageWidth(); ++x) {
             // fill some color
-            images.back()->pixel(x, y)[Image::R] = x * 2 % 40 + y * 57 % 203 - y * int(exp(x) * 4) % 23;
-            images.back()->pixel(x, y)[Image::G] = x * 54 % 87 + int(log(y) * 13) % 147 - y * x * 2 % 76;
-            images.back()->pixel(x, y)[Image::B] = int(atan(x) * 73) % 143 + y * 46 % 86 - y * x * 54 % 31;
+            formula_image->pixel(x, y)[Image::R] = x * 2 % 40 + y * 57 % 203 - y * int(exp(x) * 4) % 23;
+            formula_image->pixel(x, y)[Image::G] = x * 54 % 87 + int(log(y) * 13) % 147 - y * x * 2 % 76;
+            formula_image->pixel(x, y)[Image::B] = int(atan(x) * 73) % 143 + y * 46 % 86 - y * x * 54 % 31;
         }
     }
-    images.back()->loadToTexture();
+    formula_image->loadToTexture();
+    image_windows.emplace_back(std::make_shared<ImageWindow>(formula_image, "default math formula image"));
 
     // window loop
 
@@ -294,35 +297,85 @@ int main(int argc, const char **argv) {
             ImGui::EndMainMenuBar();
         }
 
-        for (std::shared_ptr<Image> image : images) {
-            ImGui::Begin(std::to_string(image->getTextureId()).c_str(), nullptr, ImGuiWindowFlags_MenuBar);
+        for (int i = 0; i < image_windows.size(); ++i) {
+            std::shared_ptr<ImageWindow> image_window = image_windows[i];
 
-            if (ImGui::BeginMenuBar()) {
-                if (ImGui::BeginMenu("Save")) {
-                    if (ImGui::MenuItem("JPG")) { handle_save_iamge(image, std::string("jpg")); }
-                    if (ImGui::MenuItem("PNG")) { handle_save_iamge(image, std::string("png")); }
-                    ImGui::EndMenu();
-                }
-                if (ImGui::BeginMenu("Analyze")) {
-                    if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image); }
-                    ImGui::EndMenu();
-                }
-                if (ImGui::BeginMenu("Operation")) {
-                    if (ImGui::BeginMenu("Gaussian Noise")) {
-                        static int sigma = 32;
-                        constexpr float drag_speed = 0.2f;
-                        ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
-                        if (ImGui::Button("Apply")) {
-                            handle_gaussian_noise(image, sigma);
+            // image window
+            ImGui::SetNextWindowPos(image_window->computeDefaultPosition(), ImGuiCond_Appearing);
+            ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
+            image_window->is_expanded = ImGui::Begin(
+                image_window->getUiTitle(),
+                &image_window->is_open,
+                ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
+
+            // check should close
+            if (!image_window->is_open) {
+                image_windows.erase(image_windows.begin() + i);
+                continue;
+            }
+
+            if (image_window->is_expanded) {
+                // menu bar
+                if (ImGui::BeginMenuBar()) {
+                    if (ImGui::BeginMenu("Save")) {
+                        if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
+                        if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Zoom")) {
+                        ImGui::RadioButton("Original",      (int *) &image_window->scale_type, ImageWindow::SCALE_ORIGINAL);
+                        ImGui::RadioButton("Fill",          (int *) &image_window->scale_type, ImageWindow::SCALE_FILL);
+                        ImGui::RadioButton("Fit Width",     (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WIDTH);
+                        ImGui::RadioButton("Fit Height",    (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_HEIGHT);
+                        ImGui::RadioButton("Fit Window",    (int *) &image_window->scale_type, ImageWindow::SCALE_FIT_WINDOW);
+                        ImGui::RadioButton("Custom Scale:", (int *) &image_window->scale_type, ImageWindow::SCALE_CUSTOM_SCALE);
+                        ImGui::SameLine();
+
+                        constexpr float scale_button_step = 1.25f;
+                        if (ImGui::Button("-##scale_up")) {
+                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                            image_window->scale_factor /= scale_button_step;
+                        }
+                        ImGui::SameLine();
+                        ImGui::PushItemWidth(80.f);
+                        if (ImGui::DragFloat("##zoom_scale", &image_window->scale_factor,
+                                4.f, 0.001f, 10000.f, nullptr, ImGuiSliderFlags_Logarithmic)) {
+                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                        }
+                        ImGui::PopItemWidth();
+                        ImGui::SameLine();
+                        if (ImGui::Button("+##scale_down")) {
+                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                            image_window->scale_factor *= scale_button_step;
+                        }
+
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Analyze")) {
+                        if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image_window->getImage()); }
+                        ImGui::EndMenu();
+                    }
+                    if (ImGui::BeginMenu("Operation")) {
+                        if (ImGui::BeginMenu("Gaussian Noise")) {
+                            static int sigma = 32;
+                            constexpr float drag_speed = 0.2f;
+                            ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
+                            if (ImGui::Button("Apply")) {
+                                handle_gaussian_noise(image_window->getImage(), sigma);
+                            }
+                            ImGui::EndMenu();
                         }
                         ImGui::EndMenu();
                     }
-                    ImGui::EndMenu();
+                    ImGui::EndMenuBar();
                 }
-                ImGui::EndMenuBar();
-            }
 
-            ImGui::Image((void *)(intptr_t)image->getTextureId(), ImVec2(image->getImageWidth(), image->getImageHeight()));
+                // draw image
+                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
+                    image_window->computeImageRenderSize(ImVec2(
+                        ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
+                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)));
+            }
             ImGui::End();
         }
 
