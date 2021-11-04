@@ -10,7 +10,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl2.h>
-#include <nfd.h>
+#include <nfd.hpp>
 #include <stb_image.h>
 
 #include "image.h"
@@ -24,28 +24,57 @@ static void glfw_error_callback(int error, const char *mesage) {
 }
 
 std::string open_image_path() {
-    const char *file_types = "bmp;gif;jpg;png;ppm";
-    nfdchar_t *nfd_filepath = nullptr;
-    NFD_OpenDialog(file_types, nullptr, &nfd_filepath);
+    if (NFD::Init() != NFD_OKAY)
+        return std::string();
 
-    if (nfd_filepath == nullptr)
+    constexpr nfdfiltersize_t filter_list_size = 6;
+    const nfdfilteritem_t filter_list[filter_list_size] = {
+        {"PNG image", "png"},
+        {"JPG image", "jpg,jpeg"},
+        {"BMP image", "bmp"},
+        {"GIF image", "gif"},
+        {"PPM image", "ppm,pgm"},
+        {"All supported image", "png,jpg,jpeg,bmp,gif,ppm,pgm"}};
+
+    nfdchar_t *nfd_filepath = nullptr;
+    nfdresult_t result = NFD::OpenDialog(nfd_filepath, filter_list, filter_list_size, nullptr);
+
+    if (result == NFD_ERROR)
+        std::cout << "NFD ERROR: " << NFD::GetError() << std::endl;
+
+    if (result == NFD_CANCEL)
         return std::string();
 
     std::string filename(nfd_filepath);
-    free(nfd_filepath);
+    NFD::FreePath(nfd_filepath);
+
+    NFD::Quit();
     return filename;
 }
 
 std::string save_image_path(const std::string &file_type) {
-    const char *file_types = file_type.c_str();
-    nfdchar_t *nfd_filepath = nullptr;
-    NFD_SaveDialog(file_types, nullptr, &nfd_filepath);
+    if (NFD::Init() != NFD_OKAY)
+        return std::string();
 
-    if (nfd_filepath == nullptr)
+    constexpr nfdfiltersize_t filter_list_size = 3;
+    const nfdfilteritem_t filter_list[filter_list_size] = {
+        {"PNG image", "png"},
+        {"JPG image", "jpg"},
+        {"All supported image", "png,jpg"}};
+
+    nfdchar_t *nfd_filepath = nullptr;
+    nfdresult_t result = NFD::SaveDialog(nfd_filepath, filter_list, filter_list_size);
+
+    if (result == NFD_ERROR)
+        std::cout << "NFD ERROR: " << NFD::GetError() << std::endl;
+
+    if (result == NFD_CANCEL)
         return std::string();
 
     std::string filename(nfd_filepath);
-    free(nfd_filepath);
+    NFD::FreePath(nfd_filepath);
+
+    NFD::Quit();
     return filename;
 }
 
