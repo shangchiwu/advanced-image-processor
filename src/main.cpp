@@ -347,7 +347,7 @@ int main(int argc, const char **argv) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
-                        if (ImGui::MenuItem("Save")) { handle_save_iamge(image_window->getImage()); }
+                        if (ImGui::MenuItem("Save as...")) { handle_save_iamge(image_window->getImage()); }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Zoom")) {
