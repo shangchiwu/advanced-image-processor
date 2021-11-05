@@ -314,10 +314,7 @@ int main(int argc, const char **argv) {
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open image...")) {
-                    handle_open_image();
-                }
-
+                if (ImGui::MenuItem("Open image...")) { handle_open_image(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
@@ -348,6 +345,8 @@ int main(int argc, const char **argv) {
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
                         if (ImGui::MenuItem("Save as...")) { handle_save_iamge(image_window->getImage()); }
+                        ImGui::Separator();
+                        if (ImGui::MenuItem("Close")) { image_window->is_open = false; }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Zoom")) {
