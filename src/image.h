@@ -20,7 +20,7 @@ public:
     bool good() const;
 
     bool loadFromFile(const std::string &filepath);
-    bool saveToFile(const std::string &filepath, const std::string &file_type) const;
+    bool saveToFile(const std::string &filepath) const;
 
     int getImageWidth() const;
     int getImageHeight() const;

@@ -52,7 +52,7 @@ std::string open_image_path() {
     return filename;
 }
 
-std::string save_image_path(const std::string &file_type) {
+std::string save_image_path() {
     if (NFD::Init() != NFD_OKAY)
         return std::string();
 
@@ -94,12 +94,12 @@ void handle_open_image() {
     image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
 }
 
-void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
-    std::string filepath = save_image_path(file_type);
+void handle_save_iamge(const std::shared_ptr<Image> image) {
+    std::string filepath = save_image_path();
     if (filepath.empty())
         return;
-    std::cout << "Save image [" << file_type << "]: \"" << filepath << "\"" << std::endl;
-    image->saveToFile(filepath, file_type);
+    std::cout << "Save image: \"" << filepath << "\"" << std::endl;
+    image->saveToFile(filepath);
 }
 
 uint8_t to_gray_average(const uint8_t *pixel) {
@@ -347,8 +347,8 @@ int main(int argc, const char **argv) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("Save")) {
-                        if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
-                        if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
+                        if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage()); }
+                        if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage()); }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Zoom")) {
