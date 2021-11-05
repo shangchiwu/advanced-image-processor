@@ -29,12 +29,12 @@ std::string open_image_path() {
 
     constexpr nfdfiltersize_t filter_list_size = 6;
     const nfdfilteritem_t filter_list[filter_list_size] = {
-        {"PNG image", "png"},
-        {"JPG image", "jpg,jpeg"},
+        {"All supported image", "bmp,jpg,jpeg,gif,png,ppm,pgm"},
         {"BMP image", "bmp"},
+        {"JPG image", "jpg,jpeg"},
         {"GIF image", "gif"},
-        {"PPM image", "ppm,pgm"},
-        {"All supported image", "png,jpg,jpeg,bmp,gif,ppm,pgm"}};
+        {"PNG image", "png"},
+        {"PPM image", "ppm,pgm"}};
 
     nfdchar_t *nfd_filepath = nullptr;
     nfdresult_t result = NFD::OpenDialog(nfd_filepath, filter_list, filter_list_size, nullptr);
@@ -52,15 +52,15 @@ std::string open_image_path() {
     return filename;
 }
 
-std::string save_image_path(const std::string &file_type) {
+std::string save_image_path() {
     if (NFD::Init() != NFD_OKAY)
         return std::string();
 
     constexpr nfdfiltersize_t filter_list_size = 3;
     const nfdfilteritem_t filter_list[filter_list_size] = {
-        {"PNG image", "png"},
+        {"All supported image", "jpg,png"},
         {"JPG image", "jpg"},
-        {"All supported image", "png,jpg"}};
+        {"PNG image", "png"}};
 
     nfdchar_t *nfd_filepath = nullptr;
     nfdresult_t result = NFD::SaveDialog(nfd_filepath, filter_list, filter_list_size);
@@ -94,12 +94,16 @@ void handle_open_image() {
     image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
 }
 
-void handle_save_iamge(const std::shared_ptr<Image> image, const std::string &file_type) {
-    std::string filepath = save_image_path(file_type);
+void handle_save_iamge(const std::shared_ptr<Image> image) {
+    std::string filepath = save_image_path();
     if (filepath.empty())
         return;
-    std::cout << "Save image [" << file_type << "]: \"" << filepath << "\"" << std::endl;
-    image->saveToFile(filepath, file_type);
+    std::cout << "Save image: \"" << filepath << "\"" << std::endl;
+    const bool result = image->saveToFile(filepath);
+    if (!result) {
+        std::cout << "Error: Save image \"" << filepath << "\" failed!" << std::endl;
+        return;
+    }
 }
 
 uint8_t to_gray_average(const uint8_t *pixel) {
@@ -314,10 +318,7 @@ int main(int argc, const char **argv) {
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open image...")) {
-                    handle_open_image();
-                }
-
+                if (ImGui::MenuItem("Open image...")) { handle_open_image(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
 
@@ -346,9 +347,10 @@ int main(int argc, const char **argv) {
             if (image_window->is_expanded) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
-                    if (ImGui::BeginMenu("Save")) {
-                        if (ImGui::MenuItem("JPG")) { handle_save_iamge(image_window->getImage(), std::string("jpg")); }
-                        if (ImGui::MenuItem("PNG")) { handle_save_iamge(image_window->getImage(), std::string("png")); }
+                    if (ImGui::BeginMenu("File")) {
+                        if (ImGui::MenuItem("Save as...")) { handle_save_iamge(image_window->getImage()); }
+                        ImGui::Separator();
+                        if (ImGui::MenuItem("Close")) { image_window->is_open = false; }
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Zoom")) {

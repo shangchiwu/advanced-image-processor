@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <GL/gl.h>
@@ -83,11 +84,13 @@ bool Image::loadFromFile(const std::string &filepath) {
     return true;
 }
 
-bool Image::saveToFile(const std::string &filepath, const std::string &file_type) const {
-    if (file_type == "jpg") {
+bool Image::saveToFile(const std::string &filepath) const {
+    const std::string file_extension = std::filesystem::path(filepath).extension().string();
+
+    if (file_extension == ".jpg") {
         constexpr int quality = 95;
         return stbi_write_jpg(filepath.c_str(), _image_w, _image_h, 4, _data, quality) != 0;
-    } else if (file_type == "png") {
+    } else if (file_extension == ".png") {
         const int stride_in_bytes = _image_w * 4;
         return stbi_write_png(filepath.c_str(), _image_w, _image_h, 4, _data, stride_in_bytes) != 0;
     } else {
