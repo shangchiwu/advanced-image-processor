@@ -99,7 +99,11 @@ void handle_save_iamge(const std::shared_ptr<Image> image) {
     if (filepath.empty())
         return;
     std::cout << "Save image: \"" << filepath << "\"" << std::endl;
-    image->saveToFile(filepath);
+    const bool result = image->saveToFile(filepath);
+    if (!result) {
+        std::cout << "Error: Save image \"" << filepath << "\" failed!" << std::endl;
+        return;
+    }
 }
 
 uint8_t to_gray_average(const uint8_t *pixel) {
