@@ -31,7 +31,7 @@ set(IMGUI_SOURCE_FILE
     ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_opengl2.cpp
 )
 
-# Native File Dialog
+# Native File Dialog Extended
 include_directories(${CMAKE_SOURCE_DIR}/libs/nfd/include)
 link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 
