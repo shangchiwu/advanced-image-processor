@@ -29,12 +29,12 @@ std::string open_image_path() {
 
     constexpr nfdfiltersize_t filter_list_size = 6;
     const nfdfilteritem_t filter_list[filter_list_size] = {
-        {"PNG image", "png"},
-        {"JPG image", "jpg,jpeg"},
+        {"All supported image", "bmp,jpg,jpeg,gif,png,ppm,pgm"},
         {"BMP image", "bmp"},
+        {"JPG image", "jpg,jpeg"},
         {"GIF image", "gif"},
-        {"PPM image", "ppm,pgm"},
-        {"All supported image", "png,jpg,jpeg,bmp,gif,ppm,pgm"}};
+        {"PNG image", "png"},
+        {"PPM image", "ppm,pgm"}};
 
     nfdchar_t *nfd_filepath = nullptr;
     nfdresult_t result = NFD::OpenDialog(nfd_filepath, filter_list, filter_list_size, nullptr);
@@ -58,9 +58,9 @@ std::string save_image_path() {
 
     constexpr nfdfiltersize_t filter_list_size = 3;
     const nfdfilteritem_t filter_list[filter_list_size] = {
-        {"PNG image", "png"},
+        {"All supported image", "jpg,png"},
         {"JPG image", "jpg"},
-        {"All supported image", "png,jpg"}};
+        {"PNG image", "png"}};
 
     nfdchar_t *nfd_filepath = nullptr;
     nfdresult_t result = NFD::SaveDialog(nfd_filepath, filter_list, filter_list_size);
