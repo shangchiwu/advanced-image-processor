@@ -12,6 +12,7 @@
 #include <imgui_impl_opengl2.h>
 #include <nfd.hpp>
 #include <stb_image.h>
+#include <font_source_han_sans_tc_regular_bsae85.h>
 
 #include "image.h"
 #include "image_window.h"
@@ -281,8 +282,13 @@ int main(int argc, const char **argv) {
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.IniFilename = nullptr;
-
     ImGui::StyleColorsDark();
+
+    constexpr float font_size = 18.f;
+    ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
+            font_source_han_sans_tc_regular_compressed_data_base85, font_size, nullptr,
+            io.Fonts->GetGlyphRangesChineseFull());
+
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();
 

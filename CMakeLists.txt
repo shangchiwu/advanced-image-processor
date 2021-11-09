@@ -38,6 +38,9 @@ link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 # stb_image
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
+# font
+include_directories(${CMAKE_SOURCE_DIR}/libs/font)
+
 # main project
 
 set(TARGET_NAME "AdvancedImageProcessor")
