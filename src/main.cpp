@@ -284,7 +284,7 @@ int main(int argc, const char **argv) {
     io.IniFilename = nullptr;
     ImGui::StyleColorsDark();
 
-    constexpr float font_size = 16.f;
+    constexpr float font_size = 18.f;
     ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
             font_source_han_sans_tc_regular_compressed_data_base85, font_size, nullptr,
             io.Fonts->GetGlyphRangesChineseFull());
