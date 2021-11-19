@@ -27,6 +27,8 @@ public:
     const uint8_t *pixel(int x, int y) const;
     uint8_t *pixel(int x, int y);
 
+    bool resize(int width, int height);
+
     void loadToTexture() const;
     GLuint getTextureId() const;
 

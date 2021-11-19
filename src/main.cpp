@@ -253,6 +253,12 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
     delete [] noise;
 }
 
+void handle_resize_image(const std::shared_ptr<Image> image, int width, int height) {
+    std::shared_ptr<Image> resized_image = std::make_shared<Image>(*image);
+    resized_image->resize(width, height);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -393,6 +399,14 @@ int main(int argc, const char **argv) {
                         ImGui::EndMenu();
                     }
                     if (ImGui::BeginMenu("Operation")) {
+                        if (ImGui::BeginMenu("Resize")) {
+                            static int new_size[2] = {256, 256};
+                            ImGui::InputInt2("W x H", new_size);
+                            if (ImGui::Button("Apply")) {
+                                handle_resize_image(image_window->getImage(), new_size[0], new_size[1]);
+                            }
+                            ImGui::EndMenu();
+                        }
                         if (ImGui::BeginMenu("Gaussian Noise")) {
                             static int sigma = 32;
                             constexpr float drag_speed = 0.2f;
