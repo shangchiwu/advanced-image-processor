@@ -18,6 +18,9 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize.h>
+
 Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _texture_id(0) {}
 
 Image::Image(const Image &other): Image(other._image_w, other._image_h, other._data) {}
@@ -117,6 +120,34 @@ const uint8_t *Image::pixel(int x, int y) const {
 
 uint8_t *Image::pixel(int x, int y) {
     return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
+}
+
+bool Image::resize(int width, int height) {
+    if (width <= 0 || height <= 0)
+        return false;
+
+    // create pixel data array
+    const int size_in_bytes = 4 * width * height * sizeof(uint8_t);
+    uint8_t *new_pixels = new uint8_t[size_in_bytes];
+
+    // resize image
+    const bool result = stbir_resize_uint8(
+            _data, _image_w, _image_h, 0,
+            new_pixels, width, height, 0, 4);
+
+    if (!result) {
+        delete [] new_pixels;
+        return false;
+    }
+
+    // save result
+    uint8_t *old_pixels = _data;
+    _data = new_pixels;
+    delete [] old_pixels;
+    _image_w = width;
+    _image_h = height;
+
+    return true;
 }
 
 void Image::loadToTexture() const {
