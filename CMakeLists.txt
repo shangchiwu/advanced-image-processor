@@ -15,6 +15,10 @@ find_package(OpenGL REQUIRED)
 
 # third party libraries
 
+# freetype
+include_directories(${CMAKE_SOURCE_DIR}/libs/freetype/include/freetype2)
+link_directories(${CMAKE_SOURCE_DIR}/libs/freetype/lib)
+
 # GLFW
 include_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/include)
 link_directories(${CMAKE_SOURCE_DIR}/libs/GLFW/bin)
@@ -29,6 +33,7 @@ set(IMGUI_SOURCE_FILE
     ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_widgets.cpp
     ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_glfw.cpp
     ${CMAKE_SOURCE_DIR}/libs/ImGUI/imgui_impl_opengl2.cpp
+    ${CMAKE_SOURCE_DIR}/libs/ImGUI/misc/freetype/imgui_freetype.cpp
 )
 
 # Native File Dialog Extended
@@ -58,6 +63,7 @@ target_link_libraries(${TARGET_NAME}
     -static -static-libgcc -static-libstdc++
     OpenGL::GL glfw3
     nfd
+    freetype
     # OpenMP::OpenMP_CXX gomp
 )
 
