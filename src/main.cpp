@@ -259,6 +259,10 @@ void handle_resize_image(const std::shared_ptr<Image> image, int width, int heig
     image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
 }
 
+void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level) {
+
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -413,6 +417,14 @@ int main(int argc, const char **argv) {
                             ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
                             if (ImGui::Button("Apply")) {
                                 handle_gaussian_noise(image_window->getImage(), sigma);
+                            }
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::BeginMenu("HAAR Wavelet Transform")) {
+                            static int level = 2;
+                            ImGui::InputInt("level", &level);
+                            if (ImGui::Button("Apply")) {
+                                handle_haar_wavelet_transform(image_window->getImage(), level);
                             }
                             ImGui::EndMenu();
                         }
