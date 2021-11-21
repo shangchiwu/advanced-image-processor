@@ -259,6 +259,79 @@ void handle_resize_image(const std::shared_ptr<Image> image, int width, int heig
     image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
 }
 
+std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
+    if (level < 0) return nullptr;
+    if (level == 0) return std::make_shared<Image>(*image);
+
+    int cur_w = image->getImageWidth();
+    int cur_h = image->getImageHeight();
+
+    std::shared_ptr<Image> in_image = image;
+    std::shared_ptr<Image> out_image = image;
+
+    for (int current_level = 0; current_level < level; ++current_level) {
+        out_image = std::make_shared<Image>(*in_image);
+        const int half_w = cur_w / 2;
+        const int half_h = cur_h / 2;
+
+        for (int y = 0; y < half_h; ++y) {
+            for (int x = 0; x < half_w; ++x) {
+                const uint8_t a = in_image->pixel(2 * x    , 2 * y    )[Image::R];
+                const uint8_t b = in_image->pixel(2 * x + 1, 2 * y    )[Image::R];
+                const uint8_t c = in_image->pixel(2 * x    , 2 * y + 1)[Image::R];
+                const uint8_t d = in_image->pixel(2 * x + 1, 2 * y + 1)[Image::R];
+
+                const uint8_t ll = clamp((int) (   ((int) a + (int) b + (int) c + (int) d) / 4                ), 0, 255);
+                const uint8_t hl = clamp((int) (abs((int) a - (int) b + (int) c - (int) d) / 4 * scale        ), 0, 255);
+                const uint8_t lh = clamp((int) (abs((int) a + (int) b - (int) c - (int) d) / 4 * scale        ), 0, 255);
+                const uint8_t hh = clamp((int) (abs((int) a - (int) b - (int) c + (int) d) / 4 * scale * scale), 0, 255);
+
+                out_image->pixel(         x,          y)[Image::R] = ll;  // LL (left-top)
+                out_image->pixel(half_w + x,          y)[Image::R] = hl;  // HL (right-top)
+                out_image->pixel(         x, half_h + y)[Image::R] = lh;  // LH (left-bottom)
+                out_image->pixel(half_w + x, half_h + y)[Image::R] = hh;  // HH (right-bottom)
+            }
+        }
+
+        cur_w = half_w;
+        cur_h = half_h;
+        in_image = out_image;
+    }
+
+    // fill other color in pixels
+    for (int y = 0; y < out_image->getImageHeight(); ++y) {
+        for (int x = 0; x < out_image->getImageWidth(); ++x) {
+            const uint8_t color = out_image->pixel(x, y)[Image::R];
+            out_image->pixel(x, y)[Image::G] = color;
+            out_image->pixel(x, y)[Image::B] = color;
+        }
+    }
+
+    return out_image;
+}
+
+void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
+    // check
+    if (level < 0) {
+        std::cout << "level can't be negative!" << std::endl;
+        return;
+    }
+
+    // to grey
+    std::shared_ptr<Image> in_image = std::make_shared<Image>(*image);
+    generate_gray_image_and_histogram(image, in_image, nullptr);
+
+    // resize image
+    in_image->resize(
+        nearest_power_of_2(in_image->getImageWidth()),
+        nearest_power_of_2(in_image->getImageHeight()));
+
+    std::shared_ptr<Image> out_image = haar_wavelet_transform(in_image, level, scale);
+    out_image->loadToTexture();
+
+    image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -415,6 +488,17 @@ int main(int argc, const char **argv) {
                             ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
                             if (ImGui::Button("Apply")) {
                                 handle_gaussian_noise(image_window->getImage(), sigma);
+                            }
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::BeginMenu("HAAR Wavelet Transform")) {
+                            static int level = 2;
+                            static float scale = 1.f;
+                            constexpr float drag_speed = 0.4f;
+                            ImGui::InputInt("level", &level);
+                            ImGui::DragFloat("scale", &scale, drag_speed, 1.f, 256.f, nullptr, ImGuiSliderFlags_Logarithmic);
+                            if (ImGui::Button("Apply")) {
+                                handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
                             ImGui::EndMenu();
                         }

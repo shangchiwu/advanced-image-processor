@@ -1,9 +1,14 @@
+#include <cmath>
 #include <chrono>
 #include <random>
 #include <thread>
 #include "utility.h"
 
 static std::mt19937 rng;
+
+int nearest_power_of_2(int num) {
+    return round(exp2(round(log2(num))));
+}
 
 void random_seed(int seed) {
     rng.seed(seed);
