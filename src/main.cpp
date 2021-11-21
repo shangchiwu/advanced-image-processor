@@ -339,8 +339,9 @@ int main(int argc, const char **argv) {
             ImGui::EndMainMenuBar();
         }
 
-        for (int i = 0; i < image_windows.size(); ++i) {
-            std::shared_ptr<ImageWindow> image_window = image_windows[i];
+        int image_window_index = 0;
+        while (image_window_index < image_windows.size()) {
+            std::shared_ptr<ImageWindow> image_window = image_windows[image_window_index];
 
             // image window
             ImGui::SetNextWindowPos(image_window->computeDefaultPosition(), ImGuiCond_Appearing);
@@ -352,7 +353,7 @@ int main(int argc, const char **argv) {
 
             // check should close
             if (!image_window->is_open) {
-                image_windows.erase(image_windows.begin() + i);
+                image_windows.erase(image_windows.begin() + image_window_index);
                 ImGui::End();
                 continue;
             }
@@ -429,6 +430,8 @@ int main(int argc, const char **argv) {
                         ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)));
             }
             ImGui::End();
+
+            ++image_window_index;
         }
 
         // rendering
