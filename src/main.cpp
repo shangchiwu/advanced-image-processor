@@ -353,6 +353,7 @@ int main(int argc, const char **argv) {
             // check should close
             if (!image_window->is_open) {
                 image_windows.erase(image_windows.begin() + i);
+                ImGui::End();
                 continue;
             }
 
