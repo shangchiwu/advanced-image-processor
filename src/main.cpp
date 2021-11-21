@@ -311,6 +311,12 @@ std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image
 }
 
 void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
+    // check
+    if (level < 0) {
+        std::cout << "level can't be negative!" << std::endl;
+        return;
+    }
+
     // to grey
     std::shared_ptr<Image> in_image = std::make_shared<Image>(*image);
     generate_gray_image_and_histogram(image, in_image, nullptr);
