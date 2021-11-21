@@ -259,7 +259,7 @@ void handle_resize_image(const std::shared_ptr<Image> image, int width, int heig
     image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
 }
 
-std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image, int level) {
+std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
     if (level < 0) return nullptr;
     if (level == 0) return std::make_shared<Image>(*image);
 
@@ -281,10 +281,10 @@ std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image
                 const uint8_t c = in_image->pixel(2 * x    , 2 * y + 1)[Image::R];
                 const uint8_t d = in_image->pixel(2 * x + 1, 2 * y + 1)[Image::R];
 
-                const uint8_t ll =    ((int) a + (int) b + (int) c + (int) d) / 4;
-                const uint8_t hl = abs((int) a - (int) b + (int) c - (int) d) / 4;
-                const uint8_t lh = abs((int) a + (int) b - (int) c - (int) d) / 4;
-                const uint8_t hh = abs((int) a - (int) b - (int) c + (int) d) / 4;
+                const uint8_t ll = clamp((int) (   ((int) a + (int) b + (int) c + (int) d) / 4                ), 0, 255);
+                const uint8_t hl = clamp((int) (abs((int) a - (int) b + (int) c - (int) d) / 4 * scale        ), 0, 255);
+                const uint8_t lh = clamp((int) (abs((int) a + (int) b - (int) c - (int) d) / 4 * scale        ), 0, 255);
+                const uint8_t hh = clamp((int) (abs((int) a - (int) b - (int) c + (int) d) / 4 * scale * scale), 0, 255);
 
                 out_image->pixel(         x,          y)[Image::R] = ll;  // LL (left-top)
                 out_image->pixel(half_w + x,          y)[Image::R] = hl;  // HL (right-top)
@@ -310,7 +310,7 @@ std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image
     return out_image;
 }
 
-void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level) {
+void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
     // to grey
     std::shared_ptr<Image> in_image = std::make_shared<Image>(*image);
     generate_gray_image_and_histogram(image, in_image, nullptr);
@@ -320,7 +320,7 @@ void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level
         nearest_power_of_2(in_image->getImageWidth()),
         nearest_power_of_2(in_image->getImageHeight()));
 
-    std::shared_ptr<Image> out_image = haar_wavelet_transform(in_image, level);
+    std::shared_ptr<Image> out_image = haar_wavelet_transform(in_image, level, scale);
     out_image->loadToTexture();
 
     image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
@@ -485,9 +485,12 @@ int main(int argc, const char **argv) {
                         }
                         if (ImGui::BeginMenu("HAAR Wavelet Transform")) {
                             static int level = 2;
+                            static float scale = 1.f;
+                            constexpr float drag_speed = 0.4f;
                             ImGui::InputInt("level", &level);
+                            ImGui::DragFloat("scale", &scale, drag_speed, 1.f, 256.f, nullptr, ImGuiSliderFlags_Logarithmic);
                             if (ImGui::Button("Apply")) {
-                                handle_haar_wavelet_transform(image_window->getImage(), level);
+                                handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
                             ImGui::EndMenu();
                         }
