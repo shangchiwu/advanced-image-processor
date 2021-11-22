@@ -2,7 +2,7 @@
 
 [![build status badge](https://github.com/shangchiwu/advanced-image-processor/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/shangchiwu/advanced-image-processor/actions?query=workflow%3Abuild+branch%3Amaster)
 [![release version](https://img.shields.io/github/v/release/shangchiwu/advanced-image-processor)](https://github.com/shangchiwu/advanced-image-processor/releases/latest)
-[![license: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+[![license: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 The image editor used in the Advanced Image Processing course.
 
