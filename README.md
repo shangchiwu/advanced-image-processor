@@ -1,5 +1,7 @@
 # Advanced Image Processor
 
+[![license: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 The image editor used in the Advanced Image Processing course.
 
 The Advanced Image Processor is a simple image editor, which is written in C++20 and runs on Windows, and can be compiled into single executable.
