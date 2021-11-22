@@ -2,15 +2,24 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <filesystem>
 #include <iostream>
 #include <string>
 #include <GL/gl.h>
+
+#ifdef _WIN32
+    #define STBI_WINDOWS_UTF8
+    #define STBIW_WINDOWS_UTF8
+#endif // _WIN32
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
+
+#define STB_IMAGE_RESIZE_IMPLEMENTATION
+#include <stb_image_resize.h>
 
 Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _texture_id(0) {}
 
@@ -83,11 +92,13 @@ bool Image::loadFromFile(const std::string &filepath) {
     return true;
 }
 
-bool Image::saveToFile(const std::string &filepath, const std::string &file_type) const {
-    if (file_type == "jpg") {
+bool Image::saveToFile(const std::string &filepath) const {
+    const std::string file_extension = std::filesystem::path(filepath).extension().string();
+
+    if (file_extension == ".jpg") {
         constexpr int quality = 95;
         return stbi_write_jpg(filepath.c_str(), _image_w, _image_h, 4, _data, quality) != 0;
-    } else if (file_type == "png") {
+    } else if (file_extension == ".png") {
         const int stride_in_bytes = _image_w * 4;
         return stbi_write_png(filepath.c_str(), _image_w, _image_h, 4, _data, stride_in_bytes) != 0;
     } else {
@@ -109,6 +120,34 @@ const uint8_t *Image::pixel(int x, int y) const {
 
 uint8_t *Image::pixel(int x, int y) {
     return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
+}
+
+bool Image::resize(int width, int height) {
+    if (width <= 0 || height <= 0)
+        return false;
+
+    // create pixel data array
+    const int size_in_bytes = 4 * width * height * sizeof(uint8_t);
+    uint8_t *new_pixels = new uint8_t[size_in_bytes];
+
+    // resize image
+    const bool result = stbir_resize_uint8(
+            _data, _image_w, _image_h, 0,
+            new_pixels, width, height, 0, 4);
+
+    if (!result) {
+        delete [] new_pixels;
+        return false;
+    }
+
+    // save result
+    uint8_t *old_pixels = _data;
+    _data = new_pixels;
+    delete [] old_pixels;
+    _image_w = width;
+    _image_h = height;
+
+    return true;
 }
 
 void Image::loadToTexture() const {
