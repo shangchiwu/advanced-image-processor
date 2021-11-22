@@ -19,6 +19,8 @@ constexpr T partition(T a, T b, double t) {
     return (1.0 - t) * a + t * b;
 }
 
+int nearest_power_of_2(int num);
+
 void random_seed(int seed);
 double random_float();
 double random_float(double min, double max);
