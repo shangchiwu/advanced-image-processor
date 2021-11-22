@@ -1,0 +1,21 @@
+name: build
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install MSYS2 toolchain
+        uses: msys2/setup-msys2@v2.5.0
+        with:
+          msystem: MINGW64
+          update: true
+          install: git mingw-w64-x86_64-toolchain
+
+      - name: Building executable using mingw-w64-x86_64-toolchain from MSYS2
+        run: ./build
