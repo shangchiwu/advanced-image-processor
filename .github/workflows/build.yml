@@ -1,4 +1,4 @@
-name: pull-request-build
+name: build
 on:
   push:
     branches:
@@ -17,5 +17,5 @@ jobs:
           update: true
           install: git mingw-w64-x86_64-toolchain
 
-      - name: Building using mingw-w64-x86_64-toolchain from MSYS2
+      - name: Building executable using mingw-w64-x86_64-toolchain from MSYS2
         run: ./build
