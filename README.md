@@ -1,6 +1,6 @@
 # Advanced Image Processor
 
-[![build status badge](https://github.com/shangchiwu/advanced-image-processor/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/shangchiwu/advanced-image-processor/actions?query=workflow%3Abuild+branch%3Amaster)
+[![build check badge](https://github.com/shangchiwu/advanced-image-processor/actions/workflows/build-check.yml/badge.svg?branch=master)](https://github.com/shangchiwu/advanced-image-processor/actions?query=workflow%3Abuild-check+branch%3Amaster)
 [![create github release status badge](https://github.com/shangchiwu/advanced-image-processor/actions/workflows/create-github-release.yml/badge.svg)](https://github.com/shangchiwu/advanced-image-processor/actions?query=workflow%3Acreate-github-release)
 [![release version](https://img.shields.io/github/v/release/shangchiwu/advanced-image-processor)](https://github.com/shangchiwu/advanced-image-processor/releases/latest)
 [![license: MIT](https://img.shields.io/badge/license-MIT-green.svg)](https://opensource.org/licenses/MIT)
