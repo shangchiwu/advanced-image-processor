@@ -1,0 +1,16 @@
+name: Build Check
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Building
+        uses: ./.github/actions/build
