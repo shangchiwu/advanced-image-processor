@@ -11,14 +11,9 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 
 ## Features
 
-### Image File Formats
-
-- Open: BMP, GIF, JPEG, PNG, PPM (P5 and P6)
-- Save: JPG, PNG
-
-### Functions
-
-- Open and save image to another formats.
+- Supported image file formats:
+  - open: BMP, GIF, JPEG, PNG, PPM (P5 and P6)
+  - save: JPG, PNG
 - Convert a image to gray scale and show its histogram.
 - Apply gaussian noise on an image with adjustable sigma.
 - Resize image.
@@ -27,13 +22,13 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 
 ## Dependencies
 
-This project uses the following libraries / technologies:
+This project uses the following third-party libraries:
 
 - [Dear ImGUI](https://github.com/ocornut/imgui) (v1.84.2) - interactive GUI
 - [GLFW](https://www.glfw.org/) (v3.3.4) - window display
 - [Native File Dialog](https://github.com/mlabbe/nativefiledialog) (release_116) - GUI filesystem dialog
 - [stb_image, stb_image_write](https://github.com/nothings/stb) (v2.27, v1.16) - load/save image file
-- [stb_image_resize](https://github.com/nothings/stb) (v2.27, v1.16, v0.97) - resize image
+- [stb_image_resize](https://github.com/nothings/stb) (v0.97) - resize image
 - [Freetype](https://freetype.org/) (v2.11.0) - font rasterization
 - [Source Han Sans](https://github.com/adobe-fonts/source-han-sans) (v2.004R) - CJK font support
 
