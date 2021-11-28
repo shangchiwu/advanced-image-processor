@@ -30,7 +30,7 @@ if not exist CMakeCache.txt (
 :: build
 
 echo Building...
-cmake --build .
+cmake --build . -j
 
 :: exit
 
