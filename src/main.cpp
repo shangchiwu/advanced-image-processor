@@ -361,7 +361,15 @@ int main(int argc, const char **argv) {
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.IniFilename = nullptr;
+
     ImGui::StyleColorsDark();
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.WindowRounding = 8.f;
+    style.ChildRounding = 6.f;
+    style.FrameRounding = 6.f;
+    style.PopupRounding = 6.f;
+    style.GrabRounding = 6.f;
+    style.ChildRounding = 6.f;
 
     constexpr float font_size = 18.f;
     ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
