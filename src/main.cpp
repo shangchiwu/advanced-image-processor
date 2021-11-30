@@ -467,7 +467,7 @@ int main(int argc, const char **argv) {
                         ImGui::SameLine();
 
                         constexpr float scale_button_step = 1.25f;
-                        if (ImGui::Button("-##scale_up")) {
+                        if (ImGui::Button("-")) {
                             image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
                             image_window->scale_factor /= scale_button_step;
                         }
@@ -479,14 +479,14 @@ int main(int argc, const char **argv) {
                         }
                         ImGui::PopItemWidth();
                         ImGui::SameLine();
-                        if (ImGui::Button("+##scale_down")) {
+                        if (ImGui::Button("+")) {
                             image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
                             image_window->scale_factor *= scale_button_step;
                         }
 
                         ImGui::EndMenu();
                     }
-                    if (ImGui::BeginMenu("Operation")) {
+                    if (ImGui::BeginMenu("Operations")) {
                         if (ImGui::BeginMenu("Resize")) {
                             static int new_size[2] = {256, 256};
                             ImGui::InputInt2("W x H", new_size);
