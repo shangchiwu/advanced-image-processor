@@ -410,6 +410,7 @@ int main(int argc, const char **argv) {
         // menu bar
 
         static bool show_imgui_demo_window = false;
+        static bool show_fps = true;
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
@@ -419,8 +420,15 @@ int main(int argc, const char **argv) {
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Debug")) {
+                ImGui::Checkbox("Show FPS", &show_fps);
                 ImGui::Checkbox("Show ImGUI Demo Window", &show_imgui_demo_window);
                 ImGui::EndMenu();
+            }
+            if (show_fps) {
+                ImGui::PushID("show fps");
+                ImGui::InvisibleButton("", ImVec2(-70, 20));
+                ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, .5f), "FPS: %.1f", io.Framerate);
+                ImGui::PopID();
             }
             ImGui::EndMainMenuBar();
         }
