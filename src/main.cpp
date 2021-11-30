@@ -401,15 +401,24 @@ int main(int argc, const char **argv) {
 
         // menu bar
 
+        static bool show_imgui_demo_window = false;
+
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open image...")) { handle_open_image(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
-
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Debug")) {
+                ImGui::Checkbox("Show ImGUI Demo Window", &show_imgui_demo_window);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
+        }
+
+        if (show_imgui_demo_window) {
+            ImGui::ShowDemoWindow(&show_imgui_demo_window);
         }
 
         int image_window_index = 0;
