@@ -37,7 +37,9 @@ const char *ImageWindow::getUiTitle() const {
 
 void ImageWindow::setTitle(const std::string &title) {
     _title = title;
-    _ui_title = title + "###image-window-" + std::to_string(_id);
+    _ui_title = title +
+            "  [" + std::to_string(_image->getImageWidth()) + " x " + std::to_string(_image->getImageHeight()) + "]" +
+            "###image-window-" + std::to_string(_id);
 }
 
 ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
