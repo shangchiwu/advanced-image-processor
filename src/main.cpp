@@ -19,6 +19,7 @@
 #include "utility.h"
 
 std::vector<std::shared_ptr<ImageWindow>> image_windows;
+static const ImVec4 color_error(1.f, 0.f, 0.f, 1.f);
 
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
@@ -474,22 +475,34 @@ int main(int argc, const char **argv) {
                         ImGui::RadioButton("Custom Scale:", (int *) &image_window->scale_type, ImageWindow::SCALE_CUSTOM_SCALE);
                         ImGui::SameLine();
 
+                        bool is_custom_scale = false;
+                        float scale_factor = image_window->scale_factor;
                         constexpr float scale_button_step = 1.25f;
+                        bool error = false;
                         if (ImGui::Button("-")) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
-                            image_window->scale_factor /= scale_button_step;
+                            is_custom_scale = true;
+                            scale_factor /= scale_button_step;
                         }
                         ImGui::SameLine();
                         ImGui::PushItemWidth(80.f);
-                        if (ImGui::DragFloat("##zoom_scale", &image_window->scale_factor,
+                        if (ImGui::DragFloat("##zoom_scale", &scale_factor,
                                 4.f, 0.001f, 10000.f, nullptr, ImGuiSliderFlags_Logarithmic)) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                            is_custom_scale = true;
+                            if (scale_factor <= 0) error = true;
                         }
                         ImGui::PopItemWidth();
                         ImGui::SameLine();
                         if (ImGui::Button("+")) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
-                            image_window->scale_factor *= scale_button_step;
+                            is_custom_scale = true;
+                            scale_factor *= scale_button_step;
+                        }
+                        if (is_custom_scale) {
+                            if (error) {
+                                ImGui::TextColored(color_error, "Error: scale must > 0");
+                            } else {
+                                image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                                image_window->scale_factor = scale_factor;
+                            }
                         }
 
                         ImGui::EndMenu();
@@ -497,10 +510,17 @@ int main(int argc, const char **argv) {
                     if (ImGui::BeginMenu("Operations")) {
                         if (ImGui::BeginMenu("Resize")) {
                             static int new_size[2] = {256, 256};
+                            bool error = false;
                             ImGui::InputInt2("W x H", new_size);
+                            if (new_size[0] <= 0 || new_size[1] <= 0) {
+                                ImGui::TextColored(color_error, "Error: width and height must > 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_resize_image(image_window->getImage(), new_size[0], new_size[1]);
                             }
+                            if (error) ImGui::EndDisabled();
                             ImGui::EndMenu();
                         }
                         if (ImGui::MenuItem("Gray Histogram")) {
@@ -510,21 +530,39 @@ int main(int argc, const char **argv) {
                         if (ImGui::BeginMenu("Gaussian Noise")) {
                             static int sigma = 32;
                             constexpr float drag_speed = 0.2f;
+                            bool error = false;
                             ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
+                            if (sigma < 0) {
+                                ImGui::TextColored(color_error, "Error: sigma must >= 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_gaussian_noise(image_window->getImage(), sigma);
                             }
+                            if (error) ImGui::EndDisabled();
                             ImGui::EndMenu();
                         }
                         if (ImGui::BeginMenu("HAAR Wavelet Transform")) {
                             static int level = 2;
                             static float scale = 1.f;
                             constexpr float drag_speed = 0.4f;
+                            bool error = false;
                             ImGui::InputInt("level", &level);
+                            if (level < 0) {
+                                ImGui::TextColored(color_error, "Error: level must >= 0");
+                                error = true;
+                            }
                             ImGui::DragFloat("scale", &scale, drag_speed, 1.f, 256.f, nullptr, ImGuiSliderFlags_Logarithmic);
+                            if (scale <= 0) {
+                                ImGui::TextColored(color_error, "Error: scale must > 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
+                            if (error) ImGui::EndDisabled();
                             ImGui::EndMenu();
                         }
                         ImGui::EndMenu();
