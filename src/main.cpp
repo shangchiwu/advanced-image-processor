@@ -486,10 +486,6 @@ int main(int argc, const char **argv) {
 
                         ImGui::EndMenu();
                     }
-                    if (ImGui::BeginMenu("Analyze")) {
-                        if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image_window->getImage()); }
-                        ImGui::EndMenu();
-                    }
                     if (ImGui::BeginMenu("Operation")) {
                         if (ImGui::BeginMenu("Resize")) {
                             static int new_size[2] = {256, 256};
@@ -497,6 +493,10 @@ int main(int argc, const char **argv) {
                             if (ImGui::Button("Apply")) {
                                 handle_resize_image(image_window->getImage(), new_size[0], new_size[1]);
                             }
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::MenuItem("Gray Histogram")) {
+                            handle_gray_histogram(image_window->getImage());
                             ImGui::EndMenu();
                         }
                         if (ImGui::BeginMenu("Gaussian Noise")) {
