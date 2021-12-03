@@ -332,6 +332,10 @@ void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level
     image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
 }
 
+void handle_histogram_equalization(const std::shared_ptr<Image> image) {
+
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -501,6 +505,9 @@ int main(int argc, const char **argv) {
                                 handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
                             ImGui::EndMenu();
+                        }
+                        if (ImGui::MenuItem("Histogram Equalization")) {
+                            handle_histogram_equalization(image_window->getImage());
                         }
                         ImGui::EndMenu();
                     }
