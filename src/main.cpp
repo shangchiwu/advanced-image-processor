@@ -332,6 +332,67 @@ void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level
     image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
 }
 
+std::shared_ptr<Image> histogram_equalization(const std::shared_ptr<Image> image) {
+    // compute the histogram
+    int histogram[256] = {};
+    for (int y = 0; y < image->getImageHeight(); y++) {
+        for (int x = 0; x < image->getImageHeight(); x++) {
+            ++histogram[image->pixel(x, y)[Image::R]];
+        }
+    }
+    int g_min = 0;
+    while (g_min < 256 && histogram[g_min] == 0) {
+        ++g_min;
+    }
+
+    // compute the cumulative histogram
+    for (int g = 1; g < 256; ++g) {
+        histogram[g] += histogram[g - 1];
+    }
+    const int h_min = histogram[g_min];
+
+    // compute map
+    uint8_t transform_map[256] = {};
+    const double const_part = 255.0 / (image->getImageWidth() * image->getImageHeight() - h_min);
+    for (int g = 0; g < 256; ++g) {
+        transform_map[g] = clamp(round((histogram[g] - h_min) * const_part), 0.0, 255.0);
+    }
+
+    // map color to new image
+    std::shared_ptr<Image> result = std::make_shared<Image>(image->getImageWidth(), image->getImageHeight());
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            result->pixel(x, y)[Image::R] = transform_map[image->pixel(x, y)[Image::R]];
+            result->pixel(x, y)[Image::G] = transform_map[image->pixel(x, y)[Image::G]];
+            result->pixel(x, y)[Image::B] = transform_map[image->pixel(x, y)[Image::B]];
+            result->pixel(x, y)[Image::A] = image->pixel(x, y)[Image::A];
+        }
+    }
+
+    result->loadToTexture();
+
+    return result;
+}
+
+void handle_histogram_equalization(const std::shared_ptr<Image> image) {
+    // input
+    std::shared_ptr<Image> input_image = std::make_shared<Image>();
+    float histogram[256] = {};
+    generate_gray_image_and_histogram(image, input_image, histogram);
+    const std::shared_ptr<Image> input_image_histogram = generate_histogram_image(histogram);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(input_image, "histogram equalization - input"));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(input_image_histogram, "histogram equalization - input histogram"));
+
+    // process
+    std::shared_ptr<Image> output_image = histogram_equalization(input_image);
+
+    // output
+    generate_gray_image_and_histogram(output_image, nullptr, histogram);
+    const std::shared_ptr<Image> output_image_histogram = generate_histogram_image(histogram);
+    image_windows.emplace_back(std::make_shared<ImageWindow>(output_image, "histogram equalization - output"));
+    image_windows.emplace_back(std::make_shared<ImageWindow>(output_image_histogram, "histogram equalization - output histogram"));
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -501,6 +562,9 @@ int main(int argc, const char **argv) {
                                 handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
                             ImGui::EndMenu();
+                        }
+                        if (ImGui::MenuItem("Histogram Equalization")) {
+                            handle_histogram_equalization(image_window->getImage());
                         }
                         ImGui::EndMenu();
                     }
