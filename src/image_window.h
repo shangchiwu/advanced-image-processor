@@ -26,7 +26,7 @@ public:
     float scale_factor;
 
     ImageWindow(std::shared_ptr<Image> image = nullptr, const std::string &title="");
-    ImageWindow(const Image &other) = delete;
+    ImageWindow(const ImageWindow &other) = delete;
 
     const std::shared_ptr<Image> getImage() const;
     std::shared_ptr<Image> getImage();
