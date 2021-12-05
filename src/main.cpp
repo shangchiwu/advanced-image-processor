@@ -25,6 +25,10 @@ static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
 }
 
+inline void display_image_helper(const std::shared_ptr<Image> image, const std::string &title="") {
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image, title));
+}
+
 std::string open_image_path() {
     if (NFD::Init() != NFD_OKAY)
         return std::string();
@@ -93,7 +97,7 @@ void handle_open_image() {
         std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
+    display_image_helper(image, filepath);
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image) {
@@ -177,11 +181,11 @@ void handle_gray_histogram(const std::shared_ptr<Image> image) {
     std::shared_ptr<Image> gray_image = std::make_shared<Image>();
     float histogram[256] = {};
     generate_gray_image_and_histogram(image, gray_image, histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(gray_image, "gray image"));
+    display_image_helper(gray_image, "gray image");
 
     std::cout << "generate histogram image" << std::endl;
     const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(histogram_image, "gray histogram"));
+    display_image_helper(histogram_image, "gray histogram");
 }
 
 void generate_gaussian_noise(float *out_noise, int count, float sigma) {
@@ -240,7 +244,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
         }
     }
     image_with_noise->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image_with_noise, "image with noise"));
+    display_image_helper(image_with_noise, "image with noise");
 
     // draw histogram of noise
     for (int i = 0; i < num_pixels; ++i)
@@ -248,7 +252,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
     float histogram[256] = {};
     generate_histogram_from_array(noise, num_pixels, histogram);
     std::shared_ptr<Image> noise_histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(noise_histogram_image, "noise histogram"));
+    display_image_helper(noise_histogram_image, "noise histogram");
 
     // clean
     delete [] noise;
@@ -257,7 +261,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
 void handle_resize_image(const std::shared_ptr<Image> image, int width, int height) {
     std::shared_ptr<Image> resized_image = std::make_shared<Image>(*image);
     resized_image->resize(width, height);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
+    display_image_helper(resized_image, "resized image");
 }
 
 std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
@@ -330,7 +334,7 @@ void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level
     std::shared_ptr<Image> out_image = haar_wavelet_transform(in_image, level, scale);
     out_image->loadToTexture();
 
-    image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
+    display_image_helper(out_image, "haar wavelet result");
 }
 
 int main(int argc, const char **argv) {
@@ -386,7 +390,7 @@ int main(int argc, const char **argv) {
 
     std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
     if (default_image->good())
-        image_windows.emplace_back(std::make_shared<ImageWindow>(default_image, "default image.png"));
+        display_image_helper(default_image, "default image.png");
 
     std::shared_ptr<Image> formula_image = std::make_shared<Image>(400, 500);
     for (int y = 0; y < formula_image->getImageHeight(); ++y) {
@@ -398,7 +402,7 @@ int main(int argc, const char **argv) {
         }
     }
     formula_image->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(formula_image, "default math formula image"));
+    display_image_helper(formula_image, "default math formula image");
 
     // window loop
 
@@ -570,11 +574,29 @@ int main(int argc, const char **argv) {
                     ImGui::EndMenuBar();
                 }
 
-                // draw image
-                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
-                    image_window->computeImageRenderSize(ImVec2(
+                // set initial zoom mode
+                ImVec2 render_size;
+                if (image_window->is_first_seen) {
+                    constexpr float max_image_ratio = 0.75f;
+                    const ImVec2 image_size = ImVec2(
+                        image_window->getImage()->getImageWidth(), image_window->getImage()->getImageHeight());
+                    const ImVec2 max_size = ImVec2(
+                        max_image_ratio * ImGui::GetMainViewport()->WorkSize.x,
+                        max_image_ratio * ImGui::GetMainViewport()->WorkSize.y);
+                    render_size = compute_max_target_size(image_size, max_size);
+                    if (render_size.x != image_size.x && render_size.y != image_size.y) {
+                        image_window->scale_type = ImageWindow::SCALE_FIT_WINDOW;
+                        image_window->scale_factor = render_size.x / image_size.x;
+                    }
+                    image_window->is_first_seen = false;
+                } else {
+                    render_size = image_window->computeImageRenderSize(ImVec2(
                         ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
-                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)));
+                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y));
+                }
+
+                // draw image
+                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(), render_size);
             }
             ImGui::End();
 

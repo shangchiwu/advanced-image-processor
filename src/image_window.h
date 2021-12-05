@@ -20,6 +20,7 @@ public:
         SCALE_CUSTOM_SCALE
     };
 
+    bool is_first_seen;
     bool is_expanded;
     bool is_open;
     ScaleType scale_type;
