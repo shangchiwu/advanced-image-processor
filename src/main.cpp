@@ -412,7 +412,7 @@ int main(int argc, const char **argv) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // menu bar
+        // main menu bar
 
         static bool show_imgui_demo_window = false;
         static bool show_fps = true;
