@@ -385,8 +385,8 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     float histogram[256] = {};
     generate_gray_image_and_histogram(image, input_image, histogram);
     const std::shared_ptr<Image> input_image_histogram = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(input_image, "histogram equalization - input"));
-    image_windows.emplace_back(std::make_shared<ImageWindow>(input_image_histogram, "histogram equalization - input histogram"));
+    display_image_helper(input_image, "histogram equalization - input");
+    display_image_helper(input_image_histogram, "histogram equalization - input histogram");
 
     // process
     std::shared_ptr<Image> output_image = histogram_equalization(input_image);
@@ -394,8 +394,8 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     // output
     generate_gray_image_and_histogram(output_image, nullptr, histogram);
     const std::shared_ptr<Image> output_image_histogram = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(output_image, "histogram equalization - output"));
-    image_windows.emplace_back(std::make_shared<ImageWindow>(output_image_histogram, "histogram equalization - output histogram"));
+    display_image_helper(output_image, "histogram equalization - output");
+    display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
 int main(int argc, const char **argv) {
