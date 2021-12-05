@@ -20,13 +20,13 @@ public:
         SCALE_CUSTOM_SCALE
     };
 
-    bool is_expanded;
+    bool is_first_seen;
     bool is_open;
     ScaleType scale_type;
     float scale_factor;
 
-    ImageWindow(std::shared_ptr<Image> image = nullptr, const std::string &title="");
-    ImageWindow(const Image &other) = delete;
+    ImageWindow(std::shared_ptr<Image> image=nullptr, const std::string &title="");
+    ImageWindow(const ImageWindow &other) = delete;
 
     const std::shared_ptr<Image> getImage() const;
     std::shared_ptr<Image> getImage();

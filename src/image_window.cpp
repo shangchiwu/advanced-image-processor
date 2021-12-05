@@ -10,7 +10,8 @@
 int ImageWindow::_prev_id = 0;
 
 ImageWindow::ImageWindow(std::shared_ptr<Image> image, const std::string &title) :
-        is_expanded(true), is_open(true), scale_type(SCALE_ORIGINAL), scale_factor(1.f),
+        is_first_seen(true), is_open(true),
+        scale_type(SCALE_ORIGINAL), scale_factor(1.f),
         _id(++_prev_id), _image(image) {
     setTitle(title);
 }
@@ -37,7 +38,9 @@ const char *ImageWindow::getUiTitle() const {
 
 void ImageWindow::setTitle(const std::string &title) {
     _title = title;
-    _ui_title = title + "###image-window-" + std::to_string(_id);
+    _ui_title = title +
+            "  [" + std::to_string(_image->getImageWidth()) + " x " + std::to_string(_image->getImageHeight()) + "]" +
+            "###image-window-" + std::to_string(_id);
 }
 
 ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
