@@ -490,9 +490,11 @@ int main(int argc, const char **argv) {
                         }
                         ImGui::SameLine();
                         ImGui::PushItemWidth(80.f);
-                        if (ImGui::DragFloat("##zoom_scale", &scale_factor,
-                                4.f, 0.001f, 10000.f, nullptr, ImGuiSliderFlags_Logarithmic)) {
+                        float scale_factor_percent = scale_factor * 100.f;
+                        if (ImGui::DragFloat("##zoom_scale", &scale_factor_percent,
+                                4.f, 0.001f, 10000.f, "%.1f%%", ImGuiSliderFlags_Logarithmic)) {
                             is_custom_scale = true;
+                            scale_factor = scale_factor_percent / 100.f;
                             if (scale_factor <= 0) error = true;
                         }
                         ImGui::PopItemWidth();
