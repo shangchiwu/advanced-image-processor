@@ -492,7 +492,8 @@ int main(int argc, const char **argv) {
             }
             if (show_fps) {
                 ImGui::PushID("show fps");
-                ImGui::InvisibleButton("", ImVec2(-70, 20));
+                ImGui::InvisibleButton("", ImVec2(-80, 20));
+                ImGui::Separator();
                 ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, .5f), "FPS: %.1f", io.Framerate);
                 ImGui::PopID();
             }
