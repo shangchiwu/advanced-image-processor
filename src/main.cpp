@@ -578,24 +578,25 @@ int main(int argc, const char **argv) {
                 }
 
                 // set initial zoom mode
+                const ImVec2 image_size = ImVec2(
+                    image_window->getImage()->getImageWidth(), image_window->getImage()->getImageHeight());
                 ImVec2 render_size;
                 if (image_window->is_first_seen) {
                     constexpr float max_image_ratio = 0.75f;
-                    const ImVec2 image_size = ImVec2(
-                        image_window->getImage()->getImageWidth(), image_window->getImage()->getImageHeight());
                     const ImVec2 max_size = ImVec2(
                         max_image_ratio * ImGui::GetMainViewport()->WorkSize.x,
                         max_image_ratio * ImGui::GetMainViewport()->WorkSize.y);
                     render_size = compute_max_target_size(image_size, max_size);
                     if (render_size.x != image_size.x && render_size.y != image_size.y) {
                         image_window->scale_type = ImageWindow::SCALE_FIT_WINDOW;
-                        image_window->scale_factor = render_size.x / image_size.x;
                     }
                 } else {
                     render_size = image_window->computeImageRenderSize(ImVec2(
                         ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
                         ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y));
                 }
+                // update scale factor
+                image_window->scale_factor = render_size.x / image_size.x;
 
                 // draw image
                 ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(), render_size);
