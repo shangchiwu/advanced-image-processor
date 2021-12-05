@@ -447,9 +447,10 @@ int main(int argc, const char **argv) {
             std::shared_ptr<ImageWindow> image_window = image_windows[image_window_index];
 
             // image window
-            ImGui::SetNextWindowPos(image_window->computeDefaultPosition(), ImGuiCond_Appearing);
-            ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
-            image_window->is_expanded = ImGui::Begin(
+            if (image_window->is_first_seen)
+                ImGui::SetNextWindowPos(image_window->computeDefaultPosition());
+
+            const bool is_expanded = ImGui::Begin(
                 image_window->getUiTitle(),
                 &image_window->is_open,
                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
@@ -461,7 +462,7 @@ int main(int argc, const char **argv) {
                 continue;
             }
 
-            if (image_window->is_expanded) {
+            if (is_expanded) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
@@ -588,7 +589,6 @@ int main(int argc, const char **argv) {
                         image_window->scale_type = ImageWindow::SCALE_FIT_WINDOW;
                         image_window->scale_factor = render_size.x / image_size.x;
                     }
-                    image_window->is_first_seen = false;
                 } else {
                     render_size = image_window->computeImageRenderSize(ImVec2(
                         ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
@@ -600,6 +600,8 @@ int main(int argc, const char **argv) {
             }
             ImGui::End();
 
+            if (image_window->is_first_seen)
+                image_window->is_first_seen = false;
             ++image_window_index;
         }
 

@@ -21,7 +21,6 @@ public:
     };
 
     bool is_first_seen;
-    bool is_expanded;
     bool is_open;
     ScaleType scale_type;
     float scale_factor;

@@ -10,7 +10,7 @@
 int ImageWindow::_prev_id = 0;
 
 ImageWindow::ImageWindow(std::shared_ptr<Image> image, const std::string &title) :
-        is_first_seen(true), is_expanded(true), is_open(true),
+        is_first_seen(true), is_open(true),
         scale_type(SCALE_ORIGINAL), scale_factor(1.f),
         _id(++_prev_id), _image(image) {
     setTitle(title);
