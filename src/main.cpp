@@ -19,9 +19,14 @@
 #include "utility.h"
 
 std::vector<std::shared_ptr<ImageWindow>> image_windows;
+static const ImVec4 color_error(1.f, 0.f, 0.f, 1.f);
 
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
+}
+
+inline void display_image_helper(const std::shared_ptr<Image> image, const std::string &title="") {
+    image_windows.emplace_back(std::make_shared<ImageWindow>(image, title));
 }
 
 std::string open_image_path() {
@@ -92,7 +97,7 @@ void handle_open_image() {
         std::cout << "Error: Open image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image, filepath));
+    display_image_helper(image, filepath);
 }
 
 void handle_save_iamge(const std::shared_ptr<Image> image) {
@@ -176,11 +181,11 @@ void handle_gray_histogram(const std::shared_ptr<Image> image) {
     std::shared_ptr<Image> gray_image = std::make_shared<Image>();
     float histogram[256] = {};
     generate_gray_image_and_histogram(image, gray_image, histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(gray_image, "gray image"));
+    display_image_helper(gray_image, "gray image");
 
     std::cout << "generate histogram image" << std::endl;
     const std::shared_ptr<Image> histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(histogram_image, "gray histogram"));
+    display_image_helper(histogram_image, "gray histogram");
 }
 
 void generate_gaussian_noise(float *out_noise, int count, float sigma) {
@@ -239,7 +244,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
         }
     }
     image_with_noise->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(image_with_noise, "image with noise"));
+    display_image_helper(image_with_noise, "image with noise");
 
     // draw histogram of noise
     for (int i = 0; i < num_pixels; ++i)
@@ -247,7 +252,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
     float histogram[256] = {};
     generate_histogram_from_array(noise, num_pixels, histogram);
     std::shared_ptr<Image> noise_histogram_image = generate_histogram_image(histogram);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(noise_histogram_image, "noise histogram"));
+    display_image_helper(noise_histogram_image, "noise histogram");
 
     // clean
     delete [] noise;
@@ -256,7 +261,7 @@ void handle_gaussian_noise(const std::shared_ptr<Image> image, int sigma) {
 void handle_resize_image(const std::shared_ptr<Image> image, int width, int height) {
     std::shared_ptr<Image> resized_image = std::make_shared<Image>(*image);
     resized_image->resize(width, height);
-    image_windows.emplace_back(std::make_shared<ImageWindow>(resized_image, "resized image"));
+    display_image_helper(resized_image, "resized image");
 }
 
 std::shared_ptr<Image> haar_wavelet_transform(const std::shared_ptr<Image> image, int level, float scale=1.f) {
@@ -329,7 +334,68 @@ void handle_haar_wavelet_transform(const std::shared_ptr<Image> image, int level
     std::shared_ptr<Image> out_image = haar_wavelet_transform(in_image, level, scale);
     out_image->loadToTexture();
 
-    image_windows.emplace_back(std::make_shared<ImageWindow>(out_image, "haar wavelet result"));
+    display_image_helper(out_image, "haar wavelet result");
+}
+
+std::shared_ptr<Image> histogram_equalization(const std::shared_ptr<Image> image) {
+    // compute the histogram
+    int histogram[256] = {};
+    for (int y = 0; y < image->getImageHeight(); y++) {
+        for (int x = 0; x < image->getImageHeight(); x++) {
+            ++histogram[image->pixel(x, y)[Image::R]];
+        }
+    }
+    int g_min = 0;
+    while (g_min < 256 && histogram[g_min] == 0) {
+        ++g_min;
+    }
+
+    // compute the cumulative histogram
+    for (int g = 1; g < 256; ++g) {
+        histogram[g] += histogram[g - 1];
+    }
+    const int h_min = histogram[g_min];
+
+    // compute map
+    uint8_t transform_map[256] = {};
+    const double const_part = 255.0 / (image->getImageWidth() * image->getImageHeight() - h_min);
+    for (int g = 0; g < 256; ++g) {
+        transform_map[g] = clamp(round((histogram[g] - h_min) * const_part), 0.0, 255.0);
+    }
+
+    // map color to new image
+    std::shared_ptr<Image> result = std::make_shared<Image>(image->getImageWidth(), image->getImageHeight());
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            result->pixel(x, y)[Image::R] = transform_map[image->pixel(x, y)[Image::R]];
+            result->pixel(x, y)[Image::G] = transform_map[image->pixel(x, y)[Image::G]];
+            result->pixel(x, y)[Image::B] = transform_map[image->pixel(x, y)[Image::B]];
+            result->pixel(x, y)[Image::A] = image->pixel(x, y)[Image::A];
+        }
+    }
+
+    result->loadToTexture();
+
+    return result;
+}
+
+void handle_histogram_equalization(const std::shared_ptr<Image> image) {
+    // input
+    std::shared_ptr<Image> input_image = std::make_shared<Image>();
+    float histogram[256] = {};
+    generate_gray_image_and_histogram(image, input_image, histogram);
+    const std::shared_ptr<Image> input_image_histogram = generate_histogram_image(histogram);
+    display_image_helper(input_image, "histogram equalization - input");
+    display_image_helper(input_image_histogram, "histogram equalization - input histogram");
+
+    // process
+    std::shared_ptr<Image> output_image = histogram_equalization(input_image);
+
+    // output
+    generate_gray_image_and_histogram(output_image, nullptr, histogram);
+    const std::shared_ptr<Image> output_image_histogram = generate_histogram_image(histogram);
+    display_image_helper(output_image, "histogram equalization - output");
+    display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
 int main(int argc, const char **argv) {
@@ -361,7 +427,15 @@ int main(int argc, const char **argv) {
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     io.IniFilename = nullptr;
+
     ImGui::StyleColorsDark();
+    ImGuiStyle &style = ImGui::GetStyle();
+    style.WindowRounding = 8.f;
+    style.ChildRounding = 6.f;
+    style.FrameRounding = 6.f;
+    style.PopupRounding = 6.f;
+    style.GrabRounding = 6.f;
+    style.ChildRounding = 6.f;
 
     constexpr float font_size = 18.f;
     ImFont* font = io.Fonts->AddFontFromMemoryCompressedBase85TTF(
@@ -377,7 +451,7 @@ int main(int argc, const char **argv) {
 
     std::shared_ptr<Image> default_image = std::make_shared<Image>("image.png");
     if (default_image->good())
-        image_windows.emplace_back(std::make_shared<ImageWindow>(default_image, "default image.png"));
+        display_image_helper(default_image, "default image.png");
 
     std::shared_ptr<Image> formula_image = std::make_shared<Image>(400, 500);
     for (int y = 0; y < formula_image->getImageHeight(); ++y) {
@@ -389,7 +463,7 @@ int main(int argc, const char **argv) {
         }
     }
     formula_image->loadToTexture();
-    image_windows.emplace_back(std::make_shared<ImageWindow>(formula_image, "default math formula image"));
+    display_image_helper(formula_image, "default math formula image");
 
     // window loop
 
@@ -399,17 +473,35 @@ int main(int argc, const char **argv) {
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // menu bar
+        // main menu bar
+
+        static bool show_imgui_demo_window = false;
+        static bool show_fps = true;
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
                 if (ImGui::MenuItem("Open image...")) { handle_open_image(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
-
                 ImGui::EndMenu();
             }
+            if (ImGui::BeginMenu("Debug")) {
+                ImGui::Checkbox("Show FPS", &show_fps);
+                ImGui::Checkbox("Show ImGUI Demo Window", &show_imgui_demo_window);
+                ImGui::EndMenu();
+            }
+            if (show_fps) {
+                ImGui::PushID("show fps");
+                ImGui::InvisibleButton("", ImVec2(-80, 20));
+                ImGui::Separator();
+                ImGui::TextColored(ImVec4(1.f, 1.f, 1.f, .5f), "FPS: %.1f", io.Framerate);
+                ImGui::PopID();
+            }
             ImGui::EndMainMenuBar();
+        }
+
+        if (show_imgui_demo_window) {
+            ImGui::ShowDemoWindow(&show_imgui_demo_window);
         }
 
         int image_window_index = 0;
@@ -417,9 +509,10 @@ int main(int argc, const char **argv) {
             std::shared_ptr<ImageWindow> image_window = image_windows[image_window_index];
 
             // image window
-            ImGui::SetNextWindowPos(image_window->computeDefaultPosition(), ImGuiCond_Appearing);
-            ImGui::SetNextWindowCollapsed(!image_window->is_expanded);
-            image_window->is_expanded = ImGui::Begin(
+            if (image_window->is_first_seen)
+                ImGui::SetNextWindowPos(image_window->computeDefaultPosition());
+
+            const bool is_expanded = ImGui::Begin(
                 image_window->getUiTitle(),
                 &image_window->is_open,
                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
@@ -431,7 +524,7 @@ int main(int argc, const char **argv) {
                 continue;
             }
 
-            if (image_window->is_expanded) {
+            if (is_expanded) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
@@ -449,72 +542,134 @@ int main(int argc, const char **argv) {
                         ImGui::RadioButton("Custom Scale:", (int *) &image_window->scale_type, ImageWindow::SCALE_CUSTOM_SCALE);
                         ImGui::SameLine();
 
+                        bool is_custom_scale = false;
+                        float scale_factor = image_window->scale_factor;
                         constexpr float scale_button_step = 1.25f;
-                        if (ImGui::Button("-##scale_up")) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
-                            image_window->scale_factor /= scale_button_step;
+                        bool error = false;
+                        if (ImGui::Button("-")) {
+                            is_custom_scale = true;
+                            scale_factor /= scale_button_step;
                         }
                         ImGui::SameLine();
                         ImGui::PushItemWidth(80.f);
-                        if (ImGui::DragFloat("##zoom_scale", &image_window->scale_factor,
-                                4.f, 0.001f, 10000.f, nullptr, ImGuiSliderFlags_Logarithmic)) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                        float scale_factor_percent = scale_factor * 100.f;
+                        if (ImGui::DragFloat("##zoom_scale", &scale_factor_percent,
+                                4.f, 0.001f, 10000.f, "%.1f%%", ImGuiSliderFlags_Logarithmic)) {
+                            is_custom_scale = true;
+                            scale_factor = scale_factor_percent / 100.f;
+                            if (scale_factor <= 0) error = true;
                         }
                         ImGui::PopItemWidth();
                         ImGui::SameLine();
-                        if (ImGui::Button("+##scale_down")) {
-                            image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
-                            image_window->scale_factor *= scale_button_step;
+                        if (ImGui::Button("+")) {
+                            is_custom_scale = true;
+                            scale_factor *= scale_button_step;
+                        }
+                        if (is_custom_scale) {
+                            if (error) {
+                                ImGui::TextColored(color_error, "Error: scale must > 0");
+                            } else {
+                                image_window->scale_type = ImageWindow::SCALE_CUSTOM_SCALE;
+                                image_window->scale_factor = scale_factor;
+                            }
                         }
 
                         ImGui::EndMenu();
                     }
-                    if (ImGui::BeginMenu("Analyze")) {
-                        if (ImGui::MenuItem("Gray Histogram")) { handle_gray_histogram(image_window->getImage()); }
-                        ImGui::EndMenu();
-                    }
-                    if (ImGui::BeginMenu("Operation")) {
+                    if (ImGui::BeginMenu("Operations")) {
                         if (ImGui::BeginMenu("Resize")) {
                             static int new_size[2] = {256, 256};
+                            bool error = false;
                             ImGui::InputInt2("W x H", new_size);
+                            if (new_size[0] <= 0 || new_size[1] <= 0) {
+                                ImGui::TextColored(color_error, "Error: width and height must > 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_resize_image(image_window->getImage(), new_size[0], new_size[1]);
                             }
+                            if (error) ImGui::EndDisabled();
+                            ImGui::EndMenu();
+                        }
+                        if (ImGui::MenuItem("Gray Histogram")) {
+                            handle_gray_histogram(image_window->getImage());
                             ImGui::EndMenu();
                         }
                         if (ImGui::BeginMenu("Gaussian Noise")) {
                             static int sigma = 32;
                             constexpr float drag_speed = 0.2f;
+                            bool error = false;
                             ImGui::DragScalar("sigma", ImGuiDataType_U8, &sigma, drag_speed);
+                            if (sigma < 0) {
+                                ImGui::TextColored(color_error, "Error: sigma must >= 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_gaussian_noise(image_window->getImage(), sigma);
                             }
+                            if (error) ImGui::EndDisabled();
                             ImGui::EndMenu();
                         }
                         if (ImGui::BeginMenu("HAAR Wavelet Transform")) {
                             static int level = 2;
                             static float scale = 1.f;
                             constexpr float drag_speed = 0.4f;
+                            bool error = false;
                             ImGui::InputInt("level", &level);
+                            if (level < 0) {
+                                ImGui::TextColored(color_error, "Error: level must >= 0");
+                                error = true;
+                            }
                             ImGui::DragFloat("scale", &scale, drag_speed, 1.f, 256.f, nullptr, ImGuiSliderFlags_Logarithmic);
+                            if (scale <= 0) {
+                                ImGui::TextColored(color_error, "Error: scale must > 0");
+                                error = true;
+                            }
+                            if (error) ImGui::BeginDisabled();
                             if (ImGui::Button("Apply")) {
                                 handle_haar_wavelet_transform(image_window->getImage(), level, scale);
                             }
+                            if (error) ImGui::EndDisabled();
                             ImGui::EndMenu();
+                        }
+                        if (ImGui::MenuItem("Histogram Equalization")) {
+                            handle_histogram_equalization(image_window->getImage());
                         }
                         ImGui::EndMenu();
                     }
                     ImGui::EndMenuBar();
                 }
 
-                // draw image
-                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(),
-                    image_window->computeImageRenderSize(ImVec2(
+                // set initial zoom mode
+                const ImVec2 image_size = ImVec2(
+                    image_window->getImage()->getImageWidth(), image_window->getImage()->getImageHeight());
+                ImVec2 render_size;
+                if (image_window->is_first_seen) {
+                    constexpr float max_image_ratio = 0.75f;
+                    const ImVec2 max_size = ImVec2(
+                        max_image_ratio * ImGui::GetMainViewport()->WorkSize.x,
+                        max_image_ratio * ImGui::GetMainViewport()->WorkSize.y);
+                    render_size = compute_max_target_size(image_size, max_size);
+                    if (render_size.x != image_size.x && render_size.y != image_size.y) {
+                        image_window->scale_type = ImageWindow::SCALE_FIT_WINDOW;
+                    }
+                } else {
+                    render_size = image_window->computeImageRenderSize(ImVec2(
                         ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x,
-                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y)));
+                        ImGui::GetWindowContentRegionMax().y - ImGui::GetWindowContentRegionMin().y));
+                }
+                // update scale factor
+                image_window->scale_factor = render_size.x / image_size.x;
+
+                // draw image
+                ImGui::Image((void *)(intptr_t)image_window->getImage()->getTextureId(), render_size);
             }
             ImGui::End();
 
+            if (image_window->is_first_seen)
+                image_window->is_first_seen = false;
             ++image_window_index;
         }
 

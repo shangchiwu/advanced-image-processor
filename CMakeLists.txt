@@ -11,7 +11,6 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(OpenGL REQUIRED)
-# find_package(OpenMP REQUIRED)
 
 # third party libraries
 
@@ -64,7 +63,6 @@ target_link_libraries(${TARGET_NAME}
     OpenGL::GL glfw3
     nfd
     freetype
-    # OpenMP::OpenMP_CXX gomp
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")

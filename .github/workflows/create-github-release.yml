@@ -1,0 +1,40 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - v**
+
+jobs:
+  build:
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Building
+        uses: ./.github/actions/build
+
+      - name: Upload binaries to artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-binary
+          path: build/bin
+
+  release:
+    runs-on: windows-2019
+    needs: build
+    steps:
+      - name: Download binaries from artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: build-binary
+          path: assets
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body: Advanced Image Processor - ${{ github.ref_name }}
+          files: assets/AdvancedImageProcessor.exe
+          fail_on_unmatched_files: true
+          generate_release_notes: true

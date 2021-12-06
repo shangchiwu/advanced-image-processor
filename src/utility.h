@@ -3,6 +3,8 @@
 
 #include <numbers>
 
+#include <imgui.h>
+
 /* Utility Functions */
 
 constexpr double degree_to_radius(double degree) {
@@ -20,6 +22,8 @@ constexpr T partition(T a, T b, double t) {
 }
 
 int nearest_power_of_2(int num);
+
+ImVec2 compute_max_target_size(const ImVec2 &target_size, const ImVec2 &box_size);
 
 void random_seed(int seed);
 double random_float();
