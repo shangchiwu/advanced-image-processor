@@ -1,15 +1,7 @@
 # Reference: https://github.com/github/gitignore
 
 # Build folder
-build
-
-# # Prebuilt third party libraries
-# lib/*
-
-# CMake files
-CMakeCache.txt
-CMakeFiles
-cmake_install.cmake
+/build
 
 # Windows folder config file
 [Dd]esktop.ini

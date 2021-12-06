@@ -1,0 +1,2 @@
+# ignore third-party libraries in GitHub language statistics
+/libs/** linguist-vendored
