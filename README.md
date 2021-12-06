@@ -18,6 +18,7 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 - Apply gaussian noise on an image with adjustable sigma.
 - Resize image.
 - HAAR Wavelet Transform.
+- Histogram equalization.
 - ...and more features in the future.
 
 ## Dependencies
