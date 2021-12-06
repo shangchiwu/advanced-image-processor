@@ -47,7 +47,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libs/font)
 
 # main project
 
-set(TARGET_NAME "HW4_61047014S")
+set(TARGET_NAME "HW5_61047014S")
 
 add_executable(${TARGET_NAME}
     ${IMGUI_SOURCE_FILE}
