@@ -2,6 +2,9 @@
 #include <chrono>
 #include <random>
 #include <thread>
+
+#include <imgui.h>
+
 #include "utility.h"
 
 static std::mt19937 rng;
