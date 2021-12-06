@@ -35,6 +35,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body: Advanced Image Processor - ${{ github.ref_name }}
-          files: assets/hello.exe
+          files: assets/AdvancedImageProcessor.exe
           fail_on_unmatched_files: true
           generate_release_notes: true
