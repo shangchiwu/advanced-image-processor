@@ -14,12 +14,12 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 - Supported image file formats:
   - open: BMP, GIF, JPEG, PNG, PPM (P5 and P6)
   - save: JPG, PNG
-- Convert a image to gray scale and show its histogram.
-- Apply gaussian noise on an image with adjustable sigma.
-- Resize image.
-- HAAR Wavelet Transform.
-- Histogram equalization.
-- ...and more features in the future.
+- Gray scale and gray histogram
+- Gaussian noise (with adjustable sigma)
+- Image resizing
+- HAAR wavelet transform
+- Histogram equalization
+- ...and more features in the future
 
 ## Dependencies
 
