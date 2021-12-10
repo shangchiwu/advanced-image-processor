@@ -398,6 +398,10 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
+void handle_convolution(const std::shared_ptr<Image> image, int filter_size, const std::shared_ptr<float[]> filter) {
+
+}
+
 int main(int argc, const char **argv) {
 
     // init GLFW
@@ -636,6 +640,58 @@ int main(int argc, const char **argv) {
                         }
                         if (ImGui::MenuItem("Histogram Equalization")) {
                             handle_histogram_equalization(image_window->getImage());
+                        }
+                        if (ImGui::BeginMenu("Convolution")) {
+                            static int filter_size = 3;
+                            static std::shared_ptr<float[]> filter;
+                            constexpr int input_width = 80;
+                            bool need_reset_filter = true;
+                            int new_filter_size = filter_size;
+                            if (ImGui::InputInt("filter size", &new_filter_size, 2)) {
+                                if (new_filter_size > 0 && new_filter_size % 2 == 1) {
+                                    need_reset_filter = true;
+                                } else {
+                                    need_reset_filter = false;
+                                    new_filter_size = filter_size;
+                                }
+                            }
+                            if (need_reset_filter) {
+                                std::shared_ptr<float[]> new_filter(new float[new_filter_size * new_filter_size]());
+                                if (filter != nullptr) {
+                                    const int copy_size = new_filter_size < filter_size ? new_filter_size : filter_size;
+                                    for (int y = 0; y < copy_size; ++y) {
+                                        for (int x = 0; x < copy_size; ++x) {
+                                            new_filter[y * new_filter_size + x] = filter[y * filter_size + x];
+                                        }
+                                    }
+                                }
+                                filter = new_filter;
+                                filter_size = new_filter_size;
+                                need_reset_filter = false;
+                            }
+                            const ImGuiTableFlags table_flags =
+                                    ImGuiTableFlags_Borders | ImGuiTableFlags_NoHostExtendX |
+                                    ImGuiTableFlags_NoPadOuterX;
+                            ImGui::Text("filter:");
+                            ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0.f, 0.f));
+                            if (ImGui::BeginTable("filter", filter_size, table_flags)) {
+                                for (int y = 0; y < filter_size; y++) {
+                                    ImGui::TableNextRow();
+                                    for (int x = 0; x < filter_size; x++) {
+                                        ImGui::TableSetColumnIndex(x);
+                                        const std::string label = "##" + std::to_string(y) + "-" + std::to_string(x);
+                                        ImGui::PushItemWidth(input_width);
+                                        ImGui::InputFloat(label.c_str(), &filter[y * filter_size + x]);
+                                        ImGui::PopItemWidth();
+                                    }
+                                }
+                                ImGui::EndTable();
+                            }
+                            ImGui::PopStyleVar();
+                            if (ImGui::Button("Apply")) {
+                                handle_convolution(image_window->getImage(), filter_size, filter);
+                            }
+                            ImGui::EndMenu();
                         }
                         ImGui::EndMenu();
                     }
