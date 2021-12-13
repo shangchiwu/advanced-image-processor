@@ -122,6 +122,21 @@ uint8_t *Image::pixel(int x, int y) {
     return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
 }
 
+void Image::fill(uint8_t level, uint8_t a) {
+    fill(level, level, level, a);
+}
+
+void Image::fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    for (int y = 0; y < _image_h; ++y) {
+        for (int x = 0; x < _image_w; ++x) {
+            pixel(x, y)[R] = r;
+            pixel(x, y)[G] = g;
+            pixel(x, y)[B] = b;
+            pixel(x, y)[A] = a;
+        }
+    }
+}
+
 bool Image::resize(int width, int height) {
     if (width <= 0 || height <= 0)
         return false;
