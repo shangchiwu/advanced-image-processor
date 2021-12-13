@@ -398,7 +398,7 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
-void handle_convolution(const std::shared_ptr<Image> image, int filter_size, const std::shared_ptr<float[]> filter) {
+void handle_convolution(const std::shared_ptr<Image> image, int kernel_size, const std::shared_ptr<float[]> kernel) {
 
 }
 
@@ -642,46 +642,46 @@ int main(int argc, const char **argv) {
                             handle_histogram_equalization(image_window->getImage());
                         }
                         if (ImGui::BeginMenu("Convolution")) {
-                            static int filter_size = 3;
-                            static std::shared_ptr<float[]> filter;
+                            static int kernel_size = 3;
+                            static std::shared_ptr<float[]> kernel;
                             constexpr int input_width = 80;
-                            bool need_reset_filter = true;
-                            int new_filter_size = filter_size;
-                            if (ImGui::InputInt("filter size", &new_filter_size, 2)) {
-                                if (new_filter_size > 0 && new_filter_size % 2 == 1) {
-                                    need_reset_filter = true;
+                            bool need_reset_kernel = true;
+                            int new_kernel_size = kernel_size;
+                            if (ImGui::InputInt("kernel size", &new_kernel_size, 2)) {
+                                if (new_kernel_size > 0 && new_kernel_size % 2 == 1) {
+                                    need_reset_kernel = true;
                                 } else {
-                                    need_reset_filter = false;
-                                    new_filter_size = filter_size;
+                                    need_reset_kernel = false;
+                                    new_kernel_size = kernel_size;
                                 }
                             }
-                            if (need_reset_filter) {
-                                std::shared_ptr<float[]> new_filter(new float[new_filter_size * new_filter_size]());
-                                if (filter != nullptr) {
-                                    const int copy_size = new_filter_size < filter_size ? new_filter_size : filter_size;
+                            if (need_reset_kernel) {
+                                std::shared_ptr<float[]> new_kernel(new float[new_kernel_size * new_kernel_size]());
+                                if (kernel != nullptr) {
+                                    const int copy_size = new_kernel_size < kernel_size ? new_kernel_size : kernel_size;
                                     for (int y = 0; y < copy_size; ++y) {
                                         for (int x = 0; x < copy_size; ++x) {
-                                            new_filter[y * new_filter_size + x] = filter[y * filter_size + x];
+                                            new_kernel[y * new_kernel_size + x] = kernel[y * kernel_size + x];
                                         }
                                     }
                                 }
-                                filter = new_filter;
-                                filter_size = new_filter_size;
-                                need_reset_filter = false;
+                                kernel = new_kernel;
+                                kernel_size = new_kernel_size;
+                                need_reset_kernel = false;
                             }
                             const ImGuiTableFlags table_flags =
                                     ImGuiTableFlags_Borders | ImGuiTableFlags_NoHostExtendX |
                                     ImGuiTableFlags_NoPadOuterX;
-                            ImGui::Text("filter:");
+                            ImGui::Text("kernel:");
                             ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0.f, 0.f));
-                            if (ImGui::BeginTable("filter", filter_size, table_flags)) {
-                                for (int y = 0; y < filter_size; y++) {
+                            if (ImGui::BeginTable("kernel", kernel_size, table_flags)) {
+                                for (int y = 0; y < kernel_size; y++) {
                                     ImGui::TableNextRow();
-                                    for (int x = 0; x < filter_size; x++) {
+                                    for (int x = 0; x < kernel_size; x++) {
                                         ImGui::TableSetColumnIndex(x);
                                         const std::string label = "##" + std::to_string(y) + "-" + std::to_string(x);
                                         ImGui::PushItemWidth(input_width);
-                                        ImGui::InputFloat(label.c_str(), &filter[y * filter_size + x]);
+                                        ImGui::InputFloat(label.c_str(), &kernel[y * kernel_size + x]);
                                         ImGui::PopItemWidth();
                                     }
                                 }
@@ -689,7 +689,7 @@ int main(int argc, const char **argv) {
                             }
                             ImGui::PopStyleVar();
                             if (ImGui::Button("Apply")) {
-                                handle_convolution(image_window->getImage(), filter_size, filter);
+                                handle_convolution(image_window->getImage(), kernel_size, kernel);
                             }
                             ImGui::EndMenu();
                         }
