@@ -398,8 +398,57 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
-void handle_convolution(const std::shared_ptr<Image> image, int kernel_size, const std::shared_ptr<float[]> kernel) {
+std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int kernel_size, const float *kernel) {
+    const int half_kernel_size = kernel_size / 2;
 
+    // make padded image
+    std::shared_ptr<Image> padded_image = std::make_shared<Image>(
+            image->getImageWidth() + kernel_size - 1, image->getImageHeight() + kernel_size - 1);
+    padded_image->fill(0);
+
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        const int padded_y = y + kernel_size - 1;
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            const int padded_x = x + kernel_size - 1;
+            padded_image->pixel(padded_x, padded_y)[Image::R] = image->pixel(x, y)[Image::R];
+            padded_image->pixel(padded_x, padded_y)[Image::G] = image->pixel(x, y)[Image::G];
+            padded_image->pixel(padded_x, padded_y)[Image::B] = image->pixel(x, y)[Image::B];
+            padded_image->pixel(padded_x, padded_y)[Image::A] = image->pixel(x, y)[Image::A];
+        }
+    }
+
+    // make result image
+    std::shared_ptr<Image> result = std::make_shared<Image>(image->getImageWidth(), image->getImageHeight());
+
+    // do convolution on each pixel
+    for (int y = 0; y < image->getImageHeight(); ++y) {
+        const int padded_y = y + kernel_size - 1;
+        for (int x = 0; x < image->getImageWidth(); ++x) {
+            const int padded_x = x + kernel_size - 1;
+
+            int sum[3] = {};
+            for (int t = -half_kernel_size; t <= half_kernel_size; ++t) {
+                for (int s = -half_kernel_size; s <= half_kernel_size; ++s) {
+                    const int kernel_index = (half_kernel_size - t) * kernel_size + (half_kernel_size - s);
+                    sum[Image::R] += kernel[kernel_index] * padded_image->pixel(padded_x + s, padded_y + t)[Image::R];
+                    sum[Image::G] += kernel[kernel_index] * padded_image->pixel(padded_x + s, padded_y + t)[Image::G];
+                    sum[Image::B] += kernel[kernel_index] * padded_image->pixel(padded_x + s, padded_y + t)[Image::B];
+                }
+            }
+
+            result->pixel(x, y)[Image::R] = clamp(sum[Image::R], 0, 255);
+            result->pixel(x, y)[Image::G] = clamp(sum[Image::G], 0, 255);
+            result->pixel(x, y)[Image::B] = clamp(sum[Image::B], 0, 255);
+        }
+    }
+
+    result->loadToTexture();
+    return result;
+}
+
+void handle_convolution(const std::shared_ptr<Image> image, int kernel_size, const std::shared_ptr<float[]> kernel) {
+    std::shared_ptr<Image> result = image_convolution(image, kernel_size, kernel.get());
+    display_image_helper(result, "convolution result");
 }
 
 int main(int argc, const char **argv) {
