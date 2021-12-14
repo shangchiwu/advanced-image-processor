@@ -403,7 +403,7 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
 
     // make padded image
     std::shared_ptr<Image> padded_image = std::make_shared<Image>(
-            image->getImageWidth() + kernel_size - 1, image->getImageHeight() + kernel_size - 1);
+            image->getImageWidth() + 2 * (kernel_size - 1), image->getImageHeight() + 2 * (kernel_size - 1));
     padded_image->fill(0);
 
     for (int y = 0; y < image->getImageHeight(); ++y) {
