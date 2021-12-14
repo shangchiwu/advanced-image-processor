@@ -426,7 +426,7 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
         for (int x = 0; x < image->getImageWidth(); ++x) {
             const int padded_x = x + kernel_size - 1;
 
-            int sum[3] = {};
+            float sum[3] = {};
             for (int t = -half_kernel_size; t <= half_kernel_size; ++t) {
                 for (int s = -half_kernel_size; s <= half_kernel_size; ++s) {
                     const int kernel_index = (half_kernel_size - t) * kernel_size + (half_kernel_size - s);
@@ -436,9 +436,9 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
                 }
             }
 
-            result->pixel(x, y)[Image::R] = clamp(sum[Image::R], 0, 255);
-            result->pixel(x, y)[Image::G] = clamp(sum[Image::G], 0, 255);
-            result->pixel(x, y)[Image::B] = clamp(sum[Image::B], 0, 255);
+            result->pixel(x, y)[Image::R] = clamp(round(sum[Image::R]), 0.0, 255.0);
+            result->pixel(x, y)[Image::G] = clamp(round(sum[Image::G]), 0.0, 255.0);
+            result->pixel(x, y)[Image::B] = clamp(round(sum[Image::B]), 0.0, 255.0);
         }
     }
 
