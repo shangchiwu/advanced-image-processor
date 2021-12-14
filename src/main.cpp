@@ -707,10 +707,14 @@ int main(int argc, const char **argv) {
                             if (need_reset_kernel) {
                                 std::shared_ptr<float[]> new_kernel(new float[new_kernel_size * new_kernel_size]());
                                 if (kernel != nullptr) {
-                                    const int copy_size = new_kernel_size < kernel_size ? new_kernel_size : kernel_size;
-                                    for (int y = 0; y < copy_size; ++y) {
-                                        for (int x = 0; x < copy_size; ++x) {
-                                            new_kernel[y * new_kernel_size + x] = kernel[y * kernel_size + x];
+                                    // copy existing kernel to the new one
+                                    const int offset = (new_kernel_size - kernel_size) / 2;
+                                    for (int y = 0; y < new_kernel_size; ++y) {
+                                        const int old_y = y - offset;
+                                        for (int x = 0; x < new_kernel_size; ++x) {
+                                            const int old_x = x - offset;
+                                            if (old_x >= 0 && old_x < kernel_size && old_y >= 0 && old_y < kernel_size)
+                                                new_kernel[y * new_kernel_size + x] = kernel[old_y * kernel_size + old_x];
                                         }
                                     }
                                 }
