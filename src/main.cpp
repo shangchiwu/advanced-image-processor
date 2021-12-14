@@ -413,7 +413,6 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
             padded_image->pixel(padded_x, padded_y)[Image::R] = image->pixel(x, y)[Image::R];
             padded_image->pixel(padded_x, padded_y)[Image::G] = image->pixel(x, y)[Image::G];
             padded_image->pixel(padded_x, padded_y)[Image::B] = image->pixel(x, y)[Image::B];
-            padded_image->pixel(padded_x, padded_y)[Image::A] = image->pixel(x, y)[Image::A];
         }
     }
 
@@ -439,6 +438,7 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
             result->pixel(x, y)[Image::R] = clamp(round(sum[Image::R]), 0.0, 255.0);
             result->pixel(x, y)[Image::G] = clamp(round(sum[Image::G]), 0.0, 255.0);
             result->pixel(x, y)[Image::B] = clamp(round(sum[Image::B]), 0.0, 255.0);
+            result->pixel(x, y)[Image::A] = image->pixel(x, y)[Image::A];  // preserve original alpha channel
         }
     }
 
