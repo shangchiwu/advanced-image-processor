@@ -19,6 +19,7 @@ The Advanced Image Processor is a simple image editor, which is written in C++20
 - Image resizing
 - HAAR wavelet transform
 - Histogram equalization
+- Convolution
 - ...and more features in the future
 
 ## Dependencies
