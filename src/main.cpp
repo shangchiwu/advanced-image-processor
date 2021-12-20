@@ -439,7 +439,14 @@ void handle_histogram_equalization(const std::shared_ptr<Image> image) {
     display_image_helper(output_image_histogram, "histogram equalization - output histogram");
 }
 
-std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int kernel_size, const float *kernel) {
+enum class ConvolutionEdgeHandlingMethod {
+    EXTEND = 0,
+    WRAP,
+    MIRROR
+};
+
+std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int kernel_size, const float *kernel,
+        ConvolutionEdgeHandlingMethod edge_handling_method=ConvolutionEdgeHandlingMethod::EXTEND) {
     const int half_kernel_size = kernel_size / 2;
 
     // make padded image
@@ -447,13 +454,40 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
             image->getImageWidth() + 2 * (kernel_size - 1), image->getImageHeight() + 2 * (kernel_size - 1));
     padded_image->fill(0);
 
-    for (int y = 0; y < image->getImageHeight(); ++y) {
-        const int padded_y = y + kernel_size - 1;
-        for (int x = 0; x < image->getImageWidth(); ++x) {
-            const int padded_x = x + kernel_size - 1;
-            padded_image->pixel(padded_x, padded_y)[Image::R] = image->pixel(x, y)[Image::R];
-            padded_image->pixel(padded_x, padded_y)[Image::G] = image->pixel(x, y)[Image::G];
-            padded_image->pixel(padded_x, padded_y)[Image::B] = image->pixel(x, y)[Image::B];
+    const int original_w = image->getImageWidth();
+    const int original_h = image->getImageHeight();
+
+    std::cout << "edge handling method: " << (int) edge_handling_method << std::endl;
+
+    for (int padded_y = 0; padded_y < padded_image->getImageHeight(); ++padded_y) {
+        const int original_y = padded_y - kernel_size + 1;
+        for (int padded_x = 0; padded_x < padded_image->getImageWidth(); ++padded_x) {
+            const int original_x = padded_x - kernel_size + 1;
+
+            // copy from original pixel
+            int map_x = original_x;
+            int map_y = original_y;
+
+            // edge handling
+            if (original_x < 0 || original_x >= original_w || original_y < 0 || original_y >= original_h) {
+                if (edge_handling_method == ConvolutionEdgeHandlingMethod::EXTEND) {
+                    map_x = clamp(original_x, 0, original_w - 1);
+                    map_y = clamp(original_y, 0, original_h - 1);
+                } else if (edge_handling_method == ConvolutionEdgeHandlingMethod::WRAP) {
+                    map_x = (original_x + original_w) % original_w;
+                    map_y = (original_y + original_h) % original_h;
+                } else if (edge_handling_method == ConvolutionEdgeHandlingMethod::MIRROR) {
+                    if (original_x < 0)            map_x = -original_x - 1;
+                    if (original_x >= original_w ) map_x = original_w - (original_x - original_w) - 1;
+                    if (original_y < 0)            map_y = -original_y - 1;
+                    if (original_y >= original_h ) map_y = original_h - (original_y - original_h) - 1;
+                }
+            }
+
+            // copy the right pixel from the original image
+            padded_image->pixel(padded_x, padded_y)[Image::R] = image->pixel(map_x, map_y)[Image::R];
+            padded_image->pixel(padded_x, padded_y)[Image::G] = image->pixel(map_x, map_y)[Image::G];
+            padded_image->pixel(padded_x, padded_y)[Image::B] = image->pixel(map_x, map_y)[Image::B];
         }
     }
 
@@ -487,8 +521,9 @@ std::shared_ptr<Image> image_convolution(const std::shared_ptr<Image> image, int
     return result;
 }
 
-void handle_convolution(const std::shared_ptr<Image> image, int kernel_size, const std::shared_ptr<float[]> kernel) {
-    std::shared_ptr<Image> result = image_convolution(image, kernel_size, kernel.get());
+void handle_convolution(const std::shared_ptr<Image> image, int kernel_size, const std::shared_ptr<float[]> kernel,
+        ConvolutionEdgeHandlingMethod edge_handling_method) {
+    std::shared_ptr<Image> result = image_convolution(image, kernel_size, kernel.get(), edge_handling_method);
     display_image_helper(result, "convolution result");
 }
 
@@ -733,6 +768,7 @@ int main(int argc, const char **argv) {
                         }
                         if (ImGui::BeginMenu("Convolution")) {
                             static int template_id = 0;
+                            static ConvolutionEdgeHandlingMethod edge_handling_method = ConvolutionEdgeHandlingMethod::EXTEND;
                             static int kernel_size = 3;
                             static std::shared_ptr<float[]> kernel;
                             static bool need_load_template = true;
@@ -752,6 +788,10 @@ int main(int argc, const char **argv) {
                                         ImGui::SetItemDefaultFocus();
                                 }
                                 ImGui::EndCombo();
+                            }
+                            int new_edge_handling_method_int = (int) edge_handling_method;
+                            if (ImGui::Combo("edge handling", &new_edge_handling_method_int, "extend\0wrap\0mirror\0\0")) {
+                                edge_handling_method = (ConvolutionEdgeHandlingMethod) new_edge_handling_method_int;
                             }
                             if (ImGui::InputInt("kernel size", &new_kernel_size, 2)) {
                                 if (new_kernel_size > 0 && new_kernel_size % 2 == 1) {
@@ -806,7 +846,7 @@ int main(int argc, const char **argv) {
                             }
                             ImGui::PopStyleVar();
                             if (ImGui::Button("Apply")) {
-                                handle_convolution(image_window->getImage(), kernel_size, kernel);
+                                handle_convolution(image_window->getImage(), kernel_size, kernel, edge_handling_method);
                             }
                             ImGui::EndMenu();
                         }
