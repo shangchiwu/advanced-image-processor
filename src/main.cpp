@@ -21,6 +21,47 @@
 std::vector<std::shared_ptr<ImageWindow>> image_windows;
 static const ImVec4 color_error(1.f, 0.f, 0.f, 1.f);
 
+constexpr int convolution_kernel_template_num = 6;
+
+const char *convolution_kernel_template_name[] = {
+    "Identity",
+    "Edge detection (4-way)",
+    "Edge detection (8-way)",
+    "Sharpen",
+    "Gaussian blur 3x3",
+    "emboss"
+};
+
+const int convolution_kernel_template_size[] = {3, 3, 3, 3, 3, 3};
+
+const float convolution_kernel_template_elem[][9] = {
+    {
+        0.f, 0.f, 0.f,
+        0.f, 1.f, 0.f,
+        0.f, 0.f, 0.f
+    }, {
+         0.f, -1.f,  0.f,
+        -1.f,  4.f, -1.f,
+         0.f, -1.f,  0.f
+    }, {
+        -1.f, -1.f, -1.f,
+        -1.f,  8.f, -1.f,
+        -1.f, -1.f, -1.f
+    }, {
+         0.f, -1.f,  0.f,
+        -1.f,  5.f, -1.f,
+         0.f, -1.f,  0.f
+    }, {
+        0.0625f, 0.125f, 0.0625f,
+        0.125f,  0.25f,  0.125f,
+        0.0625f, 0.125f, 0.0625f
+    }, {
+        -2.f, -1.f, 0.f,
+        -1.f,  1.f, 1.f,
+         0.f,  1.f, 2.f
+    }
+};
+
 static void glfw_error_callback(int error, const char *mesage) {
     fprintf(stderr, "GLFW Error [%d]: %s\n", error, mesage);
 }
@@ -691,11 +732,27 @@ int main(int argc, const char **argv) {
                             handle_histogram_equalization(image_window->getImage());
                         }
                         if (ImGui::BeginMenu("Convolution")) {
+                            static int template_id = 0;
                             static int kernel_size = 3;
                             static std::shared_ptr<float[]> kernel;
-                            constexpr int input_width = 80;
+                            static bool need_load_template = true;
                             static bool need_reset_kernel = true;
                             int new_kernel_size = kernel_size;
+                            constexpr int input_width = 80;
+                            if (ImGui::BeginCombo("template", convolution_kernel_template_name[template_id])) {
+                                for (int i = 0; i < convolution_kernel_template_num; ++i) {
+                                    const bool is_selected = (template_id == i);
+                                    if (ImGui::Selectable(convolution_kernel_template_name[i], is_selected)) {
+                                        template_id = i;
+                                        new_kernel_size = convolution_kernel_template_size[template_id];
+                                        need_reset_kernel = true;
+                                        need_load_template = true;
+                                    }
+                                    if (is_selected)
+                                        ImGui::SetItemDefaultFocus();
+                                }
+                                ImGui::EndCombo();
+                            }
                             if (ImGui::InputInt("kernel size", &new_kernel_size, 2)) {
                                 if (new_kernel_size > 0 && new_kernel_size % 2 == 1) {
                                     need_reset_kernel = true;
@@ -706,8 +763,15 @@ int main(int argc, const char **argv) {
                             }
                             if (need_reset_kernel) {
                                 std::shared_ptr<float[]> new_kernel(new float[new_kernel_size * new_kernel_size]());
-                                if (kernel != nullptr) {
-                                    // copy existing kernel to the new one
+                                // copy kernel from template
+                                if (need_load_template) {
+                                    for (int i = 0; i < new_kernel_size * new_kernel_size; ++i) {
+                                        new_kernel[i] = convolution_kernel_template_elem[template_id][i];
+                                    }
+                                    need_load_template = false;
+
+                                // copy existing kernel to the new one
+                                } else if (kernel != nullptr) {
                                     const int offset = (new_kernel_size - kernel_size) / 2;
                                     for (int y = 0; y < new_kernel_size; ++y) {
                                         const int old_y = y - offset;
