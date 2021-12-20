@@ -694,7 +694,7 @@ int main(int argc, const char **argv) {
                             static int kernel_size = 3;
                             static std::shared_ptr<float[]> kernel;
                             constexpr int input_width = 80;
-                            bool need_reset_kernel = true;
+                            static bool need_reset_kernel = true;
                             int new_kernel_size = kernel_size;
                             if (ImGui::InputInt("kernel size", &new_kernel_size, 2)) {
                                 if (new_kernel_size > 0 && new_kernel_size % 2 == 1) {
