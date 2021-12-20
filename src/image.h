@@ -27,6 +27,8 @@ public:
     const uint8_t *pixel(int x, int y) const;
     uint8_t *pixel(int x, int y);
 
+    void fill(uint8_t level, uint8_t a=255);
+    void fill(uint8_t r, uint8_t g, uint8_t b, uint8_t a=255);
     bool resize(int width, int height);
 
     void loadToTexture() const;
