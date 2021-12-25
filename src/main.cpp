@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <clip.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -151,6 +152,10 @@ void handle_save_iamge(const std::shared_ptr<Image> image) {
         std::cout << "Error: Save image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
+}
+
+void handle_copy_image_title(const std::shared_ptr<ImageWindow> image_window) {
+    clip::set_text(image_window->getDisplayedTitle());
 }
 
 uint8_t to_gray_average(const uint8_t *pixel) {
@@ -657,7 +662,12 @@ int main(int argc, const char **argv) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
-                        if (ImGui::MenuItem("Save as...")) { handle_save_iamge(image_window->getImage()); }
+                        if (ImGui::MenuItem("Save as...")) {
+                            handle_save_iamge(image_window->getImage());
+                        }
+                        if (ImGui::MenuItem("Copy title to clipboard")) {
+                            handle_copy_image_title(image_window);
+                        }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Close")) { image_window->is_open = false; }
                         ImGui::EndMenu();
