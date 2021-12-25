@@ -42,6 +42,10 @@ link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 # stb_image
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
+# clip
+include_directories(${CMAKE_SOURCE_DIR}/libs/clip/include)
+link_directories(${CMAKE_SOURCE_DIR}/libs/clip/lib)
+
 # font
 include_directories(${CMAKE_SOURCE_DIR}/libs/font)
 
@@ -63,6 +67,7 @@ target_link_libraries(${TARGET_NAME}
     OpenGL::GL glfw3
     nfd
     freetype
+    clip
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
