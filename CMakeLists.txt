@@ -43,6 +43,8 @@ link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
 # clip
+set(CLIP_EXAMPLES OFF CACHE BOOL "Compile clip examples")
+set(CLIP_TESTS OFF CACHE BOOL "Compile clip tests")
 add_subdirectory(${CMAKE_SOURCE_DIR}/libs/clip)
 include_directories(${CMAKE_SOURCE_DIR}/libs/clip)
 
