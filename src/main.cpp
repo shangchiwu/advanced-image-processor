@@ -158,6 +158,25 @@ void handle_copy_image_title(const std::shared_ptr<ImageWindow> image_window) {
     clip::set_text(image_window->getDisplayedTitle());
 }
 
+void handle_copy_image_to_clipboard(const std::shared_ptr<Image> image) {
+    const uint8_t *data = image->data();
+    clip::image_spec spec;
+    spec.width = image->getImageWidth();
+    spec.height = image->getImageHeight();
+    spec.bits_per_pixel = 32;
+    spec.bytes_per_row = spec.width * 4;
+    spec.red_mask    = 0x000000ff;
+    spec.green_mask  = 0x0000ff00;
+    spec.blue_mask   = 0x00ff0000;
+    spec.alpha_mask  = 0xff000000;
+    spec.red_shift   = 0;
+    spec.green_shift = 8;
+    spec.blue_shift  = 16;
+    spec.alpha_shift = 24;
+    const clip::image img(data, spec);
+    clip::set_image(img);
+}
+
 uint8_t to_gray_average(const uint8_t *pixel) {
     int a = round((((int) pixel[Image::R]) + ((int) pixel[Image::G]) + ((int) pixel[Image::B])) / 3.0f);
     // std::cout << a << std::endl;
@@ -667,6 +686,9 @@ int main(int argc, const char **argv) {
                         }
                         if (ImGui::MenuItem("Copy title to clipboard")) {
                             handle_copy_image_title(image_window);
+                        }
+                        if (ImGui::MenuItem("Copy image to clipboard")) {
+                            handle_copy_image_to_clipboard(image_window->getImage());
                         }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Close")) { image_window->is_open = false; }
