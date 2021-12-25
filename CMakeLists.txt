@@ -43,8 +43,8 @@ link_directories(${CMAKE_SOURCE_DIR}/libs/nfd/bin)
 include_directories(${CMAKE_SOURCE_DIR}/libs/stb)
 
 # clip
-include_directories(${CMAKE_SOURCE_DIR}/libs/clip/include)
-link_directories(${CMAKE_SOURCE_DIR}/libs/clip/lib)
+add_subdirectory(${CMAKE_SOURCE_DIR}/libs/clip)
+include_directories(${CMAKE_SOURCE_DIR}/libs/clip)
 
 # font
 include_directories(${CMAKE_SOURCE_DIR}/libs/font)
