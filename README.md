@@ -49,4 +49,14 @@ The dependent libraries are provided in the `libs` directory in order to simplif
 
 ### Build Steps
 
-Run `build.bat` in the project directory. Then the single executable file is in the `build/bin` directory.
+1. Clone the repository and its submodules.
+2. Run `build.bat` in the project directory.
+3. Then the single executable file is in the `build/bin` directory.
+
+Or use the following commands:
+
+```sh
+git clone https://github.com/shangchiwu/advanced-image-processor.git --recursive
+cd advanced-image-processor
+./build.bat
+```
