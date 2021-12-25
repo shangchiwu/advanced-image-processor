@@ -24,6 +24,7 @@ public:
 
     int getImageWidth() const;
     int getImageHeight() const;
+    const uint8_t *data() const;
     const uint8_t *pixel(int x, int y) const;
     uint8_t *pixel(int x, int y);
 
