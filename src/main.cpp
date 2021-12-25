@@ -642,7 +642,7 @@ int main(int argc, const char **argv) {
                 ImGui::SetNextWindowPos(image_window->computeDefaultPosition());
 
             const bool is_expanded = ImGui::Begin(
-                image_window->getUiTitle(),
+                image_window->getRenderedTitle().c_str(),
                 &image_window->is_open,
                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
 

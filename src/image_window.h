@@ -31,9 +31,10 @@ public:
     const std::shared_ptr<Image> getImage() const;
     std::shared_ptr<Image> getImage();
     void setImage(std::shared_ptr<Image> image);
-    std::string getTitle() const;
-    const char *getUiTitle() const;
+    const std::string &getTitle() const;
     void setTitle(const std::string &title);
+    std::string getDisplayedTitle() const;
+    const std::string &getRenderedTitle() const;
 
     ImVec2 computeImageRenderSize(const ImVec2 &window_size=ImVec2()) const;
     ImVec2 computeDefaultPosition() const;
