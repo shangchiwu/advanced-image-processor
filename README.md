@@ -31,6 +31,7 @@ This project uses the following third-party libraries:
 - [Native File Dialog Extended](https://github.com/btzy/nativefiledialog-extended) (master (commit 800e880)) - GUI filesystem dialog
 - [stb_image, stb_image_write](https://github.com/nothings/stb) (v2.27, v1.16) - load/save image file
 - [stb_image_resize](https://github.com/nothings/stb) (v0.97) - resize image
+- [clip](https://github.com/dacap/clip) - clipboard support
 - [Freetype](https://freetype.org/) (v2.11.0) - font rasterization
 - [Source Han Sans](https://github.com/adobe-fonts/source-han-sans) (v2.004R) - CJK font support
 
@@ -48,4 +49,14 @@ The dependent libraries are provided in the `libs` directory in order to simplif
 
 ### Build Steps
 
-Run `build.bat` in the project directory. Then the single executable file is in the `build/bin` directory.
+1. Clone the repository and its submodules.
+2. Run `build.bat` in the project directory.
+3. Then the single executable file is in the `build/bin` directory.
+
+Or use the following commands:
+
+```sh
+git clone https://github.com/shangchiwu/advanced-image-processor.git --recursive
+cd advanced-image-processor
+./build.bat
+```

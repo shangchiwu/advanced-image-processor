@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <clip.h>
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
@@ -125,7 +126,7 @@ std::string save_image_path() {
     return filename;
 }
 
-void handle_open_image() {
+void handle_open_image_from_file() {
     std::string filepath = open_image_path();
     if (filepath.empty()) {
         std::cout << "Open image canceled." << std::endl;
@@ -151,6 +152,62 @@ void handle_save_iamge(const std::shared_ptr<Image> image) {
         std::cout << "Error: Save image \"" << filepath << "\" failed!" << std::endl;
         return;
     }
+}
+
+void handle_open_image_from_clipboard() {
+    if (!clip::has(clip::image_format())) {
+        std::cout << "Error: Clipboard doesn't contain an image!" << std::endl;
+        return;
+    }
+
+    clip::image img;
+    if (!clip::get_image(img)) {
+        std::cout << "Error: Getting image from clipboard failed!" << std::endl;
+        return;
+    }
+
+    const clip::image_spec spec = img.spec();
+    std::shared_ptr<Image> image = std::make_shared<Image>(spec.width, spec.height);
+
+    // save pixel data
+    for (int y = 0; y < spec.height; ++y) {
+        const uint8_t *p = (uint8_t *) (img.data() + y * spec.bytes_per_row);
+        for (int x = 0; x < spec.width; ++x) {
+            const uint64_t pixel = (*((uint64_t *) p));
+            image->pixel(x, y)[Image::R] = (pixel & spec.red_mask) >> spec.red_shift;
+            image->pixel(x, y)[Image::G] = (pixel & spec.green_mask) >> spec.green_shift;
+            image->pixel(x, y)[Image::B] = (pixel & spec.blue_mask) >> spec.blue_shift;
+            if (spec.alpha_mask)
+                image->pixel(x, y)[Image::A] = (pixel & spec.alpha_mask) >> spec.alpha_shift;
+            p += spec.bits_per_pixel / 8;
+        }
+    }
+
+    image->loadToTexture();
+    display_image_helper(image, "clipboard");
+}
+
+void handle_copy_image_title(const std::shared_ptr<ImageWindow> image_window) {
+    clip::set_text(image_window->getDisplayedTitle());
+}
+
+void handle_copy_image_to_clipboard(const std::shared_ptr<Image> image) {
+    const uint8_t *data = image->data();
+    clip::image_spec spec;
+    spec.width = image->getImageWidth();
+    spec.height = image->getImageHeight();
+    spec.bits_per_pixel = 32;
+    spec.bytes_per_row = spec.width * 4;
+    spec.red_mask    = 0x000000ff;
+    spec.green_mask  = 0x0000ff00;
+    spec.blue_mask   = 0x00ff0000;
+    spec.alpha_mask  = 0xff000000;
+    spec.red_shift   = 0;
+    spec.green_shift = 8;
+    spec.blue_shift  = 16;
+    spec.alpha_shift = 24;
+    const clip::image img(data, spec);
+    clip::set_image(img);
 }
 
 uint8_t to_gray_average(const uint8_t *pixel) {
@@ -609,7 +666,8 @@ int main(int argc, const char **argv) {
 
         if (ImGui::BeginMainMenuBar()) {
             if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("Open image...")) { handle_open_image(); }
+                if (ImGui::MenuItem("Open image from file...")) { handle_open_image_from_file(); }
+                if (ImGui::MenuItem("Open image from clipboard")) { handle_open_image_from_clipboard(); }
                 ImGui::Separator();
                 if (ImGui::MenuItem("Exit")) { glfwSetWindowShouldClose(window, GLFW_TRUE); }
                 ImGui::EndMenu();
@@ -642,7 +700,7 @@ int main(int argc, const char **argv) {
                 ImGui::SetNextWindowPos(image_window->computeDefaultPosition());
 
             const bool is_expanded = ImGui::Begin(
-                image_window->getUiTitle(),
+                image_window->getRenderedTitle().c_str(),
                 &image_window->is_open,
                 ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_HorizontalScrollbar);
 
@@ -657,7 +715,16 @@ int main(int argc, const char **argv) {
                 // menu bar
                 if (ImGui::BeginMenuBar()) {
                     if (ImGui::BeginMenu("File")) {
-                        if (ImGui::MenuItem("Save as...")) { handle_save_iamge(image_window->getImage()); }
+                        if (ImGui::MenuItem("Save as...")) {
+                            handle_save_iamge(image_window->getImage());
+                        }
+                        ImGui::Separator();
+                        if (ImGui::MenuItem("Copy title to clipboard")) {
+                            handle_copy_image_title(image_window);
+                        }
+                        if (ImGui::MenuItem("Copy image to clipboard")) {
+                            handle_copy_image_to_clipboard(image_window->getImage());
+                        }
                         ImGui::Separator();
                         if (ImGui::MenuItem("Close")) { image_window->is_open = false; }
                         ImGui::EndMenu();

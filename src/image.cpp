@@ -114,6 +114,10 @@ int Image::getImageHeight() const {
     return _image_h;
 }
 
+const uint8_t *Image::data() const {
+    return _data;
+}
+
 const uint8_t *Image::pixel(int x, int y) const {
     return &_data[(y * _image_w + x) * 4 * sizeof(uint8_t)];
 }

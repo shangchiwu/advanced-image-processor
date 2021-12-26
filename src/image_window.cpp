@@ -28,19 +28,21 @@ void ImageWindow::setImage(std::shared_ptr<Image> image) {
     _image = image;
 }
 
-std::string ImageWindow::getTitle() const {
+const std::string &ImageWindow::getTitle() const {
     return _title;
-}
-
-const char *ImageWindow::getUiTitle() const {
-    return _ui_title.c_str();
 }
 
 void ImageWindow::setTitle(const std::string &title) {
     _title = title;
-    _ui_title = title +
-            "  [" + std::to_string(_image->getImageWidth()) + " x " + std::to_string(_image->getImageHeight()) + "]" +
-            "###image-window-" + std::to_string(_id);
+    _ui_title = getDisplayedTitle() + "###image-window-" + std::to_string(_id);
+}
+
+std::string ImageWindow::getDisplayedTitle() const {
+    return _title + "  [" + std::to_string(_image->getImageWidth()) + " x " + std::to_string(_image->getImageHeight()) + "]";
+}
+
+const std::string &ImageWindow::getRenderedTitle() const {
+    return _ui_title;
 }
 
 ImVec2 ImageWindow::computeImageRenderSize(const ImVec2 &window_size) const {
