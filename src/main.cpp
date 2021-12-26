@@ -718,6 +718,7 @@ int main(int argc, const char **argv) {
                         if (ImGui::MenuItem("Save as...")) {
                             handle_save_iamge(image_window->getImage());
                         }
+                        ImGui::Separator();
                         if (ImGui::MenuItem("Copy title to clipboard")) {
                             handle_copy_image_title(image_window);
                         }
