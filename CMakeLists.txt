@@ -63,6 +63,7 @@ add_executable(${TARGET_NAME}
     src/handlers.cpp
     src/image.cpp
     src/image_window.cpp
+    src/stb_image_impl.cpp
     src/utility.cpp
 )
 
