@@ -1,6 +1,7 @@
 #ifndef ADVANCED_IMAGE_PROCESSOR_ALGORITHMS_H__
 #define ADVANCED_IMAGE_PROCESSOR_ALGORITHMS_H__
 
+#include <cstdint>
 #include <memory>
 
 #include "image.h"

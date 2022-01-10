@@ -1,6 +1,7 @@
 #include "algorithms.h"
 
 #include <cmath>
+#include <cstdint>
 #include <memory>
 #include <numbers>
 

@@ -1,6 +1,7 @@
 #ifndef ADVANCED_IMAGE_PROCESSOR_IMAGE_H__
 #define ADVANCED_IMAGE_PROCESSOR_IMAGE_H__
 
+#include <cstdint>
 #include <string>
 #include <GL/gl.h>
 
