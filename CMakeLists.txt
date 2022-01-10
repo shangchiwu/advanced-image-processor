@@ -60,6 +60,7 @@ add_executable(${TARGET_NAME}
 
     src/main.cpp
     src/algorithms.cpp
+    src/handlers.cpp
     src/image.cpp
     src/image_window.cpp
     src/utility.cpp

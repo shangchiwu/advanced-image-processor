@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <memory>
+#include <numbers>
 
 #include "image.h"
 #include "utility.h"
