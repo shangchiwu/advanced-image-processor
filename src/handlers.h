@@ -3,17 +3,10 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "algorithms.h"
 #include "image.h"
 #include "image_window.h"
-
-/*
- * External resources
- */
-
-extern std::vector<std::shared_ptr<ImageWindow>> image_windows;
 
 /*
  * Helpers

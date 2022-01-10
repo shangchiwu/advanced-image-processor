@@ -10,6 +10,7 @@
 #include "algorithms.h"
 #include "image.h"
 #include "image_window.h"
+#include "models.h"
 #include "utility.h"
 
 void display_image_helper(const std::shared_ptr<Image> image, const std::string &title) {

@@ -15,9 +15,8 @@
 #include "handlers.h"
 #include "image.h"
 #include "image_window.h"
+#include "models.h"
 #include "utility.h"
-
-std::vector<std::shared_ptr<ImageWindow>> image_windows;
 
 static const ImVec4 color_error(1.f, 0.f, 0.f, 1.f);
 
