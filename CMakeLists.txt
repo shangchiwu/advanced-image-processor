@@ -59,6 +59,7 @@ add_executable(${TARGET_NAME}
     ${IMGUI_SOURCE_FILE}
 
     src/main.cpp
+    src/algorithms.cpp
     src/image.cpp
     src/image_window.cpp
     src/utility.cpp
