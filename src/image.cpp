@@ -1,24 +1,14 @@
 #include "image.h"
 
-#include <stdint.h>
-#include <stdlib.h>
+#include <cstdint>
+#include <cstdlib>
 #include <filesystem>
 #include <iostream>
 #include <string>
 #include <GL/gl.h>
 
-#ifdef _WIN32
-    #define STBI_WINDOWS_UTF8
-    #define STBIW_WINDOWS_UTF8
-#endif // _WIN32
-
-#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
-
-#define STB_IMAGE_RESIZE_IMPLEMENTATION
 #include <stb_image_resize.h>
 
 Image::Image() : _image_w(0), _image_h(0), _data(nullptr), _texture_id(0) {}

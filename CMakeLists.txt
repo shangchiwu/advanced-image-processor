@@ -59,9 +59,14 @@ add_executable(${TARGET_NAME}
     ${IMGUI_SOURCE_FILE}
 
     src/main.cpp
+    src/algorithms.cpp
+    src/handlers.cpp
     src/image.cpp
     src/image_window.cpp
+    src/models.cpp
+    src/stb_image_impl.cpp
     src/utility.cpp
+    src/view.cpp
 )
 
 target_link_libraries(${TARGET_NAME}
