@@ -66,6 +66,7 @@ add_executable(${TARGET_NAME}
     src/models.cpp
     src/stb_image_impl.cpp
     src/utility.cpp
+    src/view.cpp
 )
 
 target_link_libraries(${TARGET_NAME}
