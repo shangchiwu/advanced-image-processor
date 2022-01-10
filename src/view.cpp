@@ -8,7 +8,10 @@
 #include <imgui_impl_opengl2.h>
 #include <font_source_han_sans_tc_regular_bsae85.h>
 
+#include "algorithms.h"
 #include "handlers.h"
+#include "image.h"
+#include "image_window.h"
 #include "models.h"
 #include "utility.h"
 
